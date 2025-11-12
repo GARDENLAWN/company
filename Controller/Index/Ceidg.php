@@ -15,23 +15,26 @@ class Ceidg extends Action
 {
     private Http $request;
     private JsonFactory $resultJsonFactory;
+    private CeidgService $ceidgService;
 
     public function __construct(
         JsonFactory $resultJsonFactory,
         Context     $context,
-        Http        $request
+        Http        $request,
+        CeidgService $ceidgService
     )
     {
         parent::__construct($context);
         $this->resultJsonFactory = $resultJsonFactory;
         $this->request = $request;
+        $this->ceidgService = $ceidgService;
     }
 
     public function execute(): Json|ResultInterface|ResponseInterface
     {
         $resultJson = $this->resultJsonFactory->create();
 
-        $data = CeidgService::getDataByNip($this->request->getParam('nip'));
+        $data = $this->ceidgService->getDataByNip($this->request->getParam('nip'));
 
         return $resultJson->setData($data);
     }
