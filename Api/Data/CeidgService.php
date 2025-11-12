@@ -11,7 +11,6 @@ class CeidgService
         $curl = curl_init();
 
         curl_setopt($curl, CURLOPT_URL, "https://dane.biznes.gov.pl/api/ceidg/v2/firmy?nip=" . $nip);
-        //https://dane.biznes.gov.pl/api/ceidg/v2/firmy?pkd=8130Z&wojewodztwo=opolskie&status=AKTYWNY
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);

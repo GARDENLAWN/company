@@ -1,25 +1,26 @@
 {
-  "name": "gardenlawn/company",
-  "description": "company",
-  "type": "magento2-module",
-  "version": "1.0.0",
-  "require": {
-    "php": ">=8.3.0",
-    "magento/product-community-edition": "^2.4.8",
-    "hyva-themes/magento2-theme-module": "^1.3.11"
-  },
-  "autoload": {
-    "files": [
-      "registration.php"
-    ],
-    "psr-4": {
-      "GardenLawn\\Company\\": ""
-    }
-  },
-  "authors": [
-    {
-      "name": "Rafał Piechota",
-      "email": "marcin.piechota@gardenlawn.pl"
-    }
-  ]
+    "name": "gardenlawn/company",
+    "description": "company",
+    "type": "magento2-module",
+    "version": "1.0.0",
+    "require": {
+        "php": ">=8.3.0",
+        "magento/product-community-edition": "^2.4.8",
+        "hyva-themes/magento2-theme-module": "^1.3.11",
+        "ext-curl": "*"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "GardenLawn\\Company\\": ""
+        }
+    },
+    "authors": [
+        {
+            "name": "Rafał Piechota",
+            "email": "marcin.piechota@gardenlawn.pl"
+        }
+    ]
 }
