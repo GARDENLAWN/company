@@ -1,0 +1,17 @@
+<?php
+
+declare(strict_types=1);
+
+use GardenLawn\Company\Block\Adminhtml\CompanyComment;
+use Magento\Framework\Escaper;
+
+/** @var Escaper $escaper */
+/** @var CompanyComment $block */
+
+echo '<legend class="admin__legend legend">Comments</legend>';
+foreach ($block->getComments() as $key => $item) {
+    echo    '<div style="margin-bottom: 25px;">
+                <p>' . $item["created_at"] . ':</p>
+                <p><b>' . $item["text"] . '</b></p>
+            </div>';
+}

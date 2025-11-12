@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<config
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Backend:etc/menu.xsd">
+    <menu>
+        <add id="GardenLawn_Company::manager" title="Company" translate="title"
+             module="GardenLawn_Company" parent="Magento_Customer::customer" sortOrder="50"
+             dependsOnModule="GardenLawn_Company" resource="GardenLawn_Company::manager"/>
+        <add id="GardenLawn_Company::add_row" title="All Companies" translate="title"
+             module="GardenLawn_Company" parent="GardenLawn_Company::manager" sortOrder="10"
+             dependsOnModule="GardenLawn_Company" action="company/grid"
+             resource="GardenLawn_Company::manager"/>
+    </menu>
+</config>

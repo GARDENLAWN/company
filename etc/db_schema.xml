@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="gardenlawn_company" resource="default" engine="innodb" comment="CEIDG company">
+        <column xsi:type="int" name="company_id" unsigned="true" nullable="false" identity="true"
+                comment="Company ID"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Updated at"/>
+        <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="true" identity="false" default="4"
+                comment="Customer Group"/>
+        <column xsi:type="text" name="nip" nullable="true" comment="NIP"/>
+        <column xsi:type="text" name="name" nullable="true" comment="Name"/>
+        <column xsi:type="text" name="phone" nullable="true" comment="Phone"/>
+        <column xsi:type="text" name="email" nullable="true" comment="Email"/>
+        <column xsi:type="text" name="ceidg_phone" nullable="true" comment="CEIDG Phone"/>
+        <column xsi:type="text" name="ceidg_email" nullable="true" comment="CEIDG Email"/>
+        <column xsi:type="text" name="www" nullable="true" comment="Www"/>
+        <column xsi:type="text" name="url" nullable="true" comment="Url"/>
+        <column xsi:type="text" name="address" nullable="true" comment="Address"/>
+        <column xsi:type="float" name="distance" nullable="true" comment="Distance"/>
+        <column xsi:type="int" name="status" nullable="true" comment="Status"/>
+        <column xsi:type="int" name="customer_id" padding="10" unsigned="true" nullable="true" identity="false" default="null"
+                comment="Customer"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="company_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="COMPANY_CUSTOMER_ID"
+                    table="gardenlawn_company" column="customer_id" referenceTable="customer_entity"
+                    referenceColumn="entity_id" onDelete="SET NULL"/>
+        <constraint xsi:type="foreign" referenceId="COMPANY_CUSTOMER_GROUP_ID"
+                    table="gardenlawn_company" column="customer_group_id" referenceTable="customer_group"
+                    referenceColumn="customer_group_id" onDelete="SET NULL"/>
+    </table>
+    <table name="gardenlawn_company_comment" resource="default" engine="innodb" comment="Comments to company">
+        <column xsi:type="int" name="comment_id" unsigned="true" nullable="false" identity="true"
+                comment="Company ID"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Created at"/>
+        <column xsi:type="timestamp" name="updated_at" on_update="true" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="Updated at"/>
+        <column xsi:type="text" name="text" nullable="true" comment="Text"/>
+        <column xsi:type="int" name="company_id" padding="10" unsigned="true" nullable="true" identity="false"
+                comment="Company"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="comment_id"/>
+        </constraint>
+        <constraint xsi:type="foreign" referenceId="COMPANY_COMMENT_ID"
+                    table="gardenlawn_company_comment" column="company_id" referenceTable="gardenlawn_company"
+                    referenceColumn="company_id" onDelete="CASCADE"/>
+    </table>
+</schema>
