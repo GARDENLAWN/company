@@ -3,23 +3,22 @@
 namespace GardenLawn\Company\Cron;
 
 use Exception;
+use GardenLawn\Company\Api\Data\CeidgService;
 use GardenLawn\Company\Enum\Status;
-use GardenLawn\Core\Model\Carrier\DistanceShipping;
 use GardenLawn\Core\Utils\Logger;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\DB\Adapter\AdapterInterface;
 
 class CompanyCeidg
 {
-    protected ObjectManager $objectManager;
-    protected DistanceShipping $distanceShipping;
     protected AdapterInterface $connection;
+    protected CeidgService $ceidgService;
 
-    public function __construct(DistanceShipping $distanceShipping)
+    public function __construct(CeidgService $ceidgService)
     {
-        $this->distanceShipping = $distanceShipping;
-        $this->objectManager = ObjectManager::getInstance();
-        $resource = $this->objectManager->get('Magento\Framework\App\ResourceConnection');
+        $this->ceidgService = $ceidgService;
+        $objectManager = ObjectManager::getInstance();
+        $resource = $objectManager->get('Magento\Framework\App\ResourceConnection');
         $this->connection = $resource->getConnection();
     }
 
@@ -28,7 +27,7 @@ class CompanyCeidg
      */
     public function execute(): void
     {
-        $page = $this->getCeidg("https://dane.biznes.gov.pl/api/ceidg/v2/firmy?pkd=8130Z&wojewodztwo=opolskie&status=AKTYWNY");
+        $page = $this->ceidgService->getDataByUrl("https://dane.biznes.gov.pl/api/ceidg/v2/firmy?pkd=8130Z&wojewodztwo=opolskie&status=AKTYWNY");
         $govlink = str_replace('&page=0', '&page=', $page->links->first);
         $last = $page->links->last;
         $url_components = parse_url($last);
@@ -37,12 +36,14 @@ class CompanyCeidg
         $status = Status::New->value;
         for ($i = 1; $i <= $max; $i++) {
             $current = $govlink . $i;
-            $page = $this->getCeidg($current);
+            $page = $this->ceidgService->getDataByUrl($current);
+            sleep(1);
             try {
                 if ($page != null && property_exists($page, 'firmy')) {
                     foreach ($page->firmy as $key => $item) {
                         $url = $item->link;
-                        $f = $this->getCeidg($url);
+                        $f = $this->ceidgService->getDataByUrl($url);
+                        sleep(1);
                         if (property_exists($f, 'firma') && $f->firma[0]->pkdGlowny == '8130Z') {
                             $name = $f->firma[0]->nazwa;
                             $email = property_exists($f->firma[0], 'email') ? $f->firma[0]->email : "";
@@ -55,7 +56,7 @@ class CompanyCeidg
                                 (property_exists($a, 'budynek') ? $a->budynek . ", " : "") .
                                 (property_exists($a, 'kod') ? $a->kod . " " : "") .
                                 (property_exists($a, 'miasto') ? $a->miasto : "");
-                            $distance = $this->distanceShipping->getDistance("ul. Namysłowska 2, 46-081 Dobrzeń Wielki", $address);
+                            $distance = 0;
                             $sql = "SELECT COUNT(company_id) AS Number FROM gardenlawn_company WHERE nip = '$nip';";
                             $count = $this->connection->fetchAll($sql)[0]["Number"];
                             if ($count == 0) {
@@ -72,22 +73,5 @@ class CompanyCeidg
                 Logger::writeLog($e);
             }
         }
-    }
-
-    private function getCeidg($url)
-    {
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
-        curl_setopt($curl, CURLOPT_XOAUTH2_BEARER, 'eyJraWQiOiJjZWlkZyIsImFsZyI6IkhTNTEyIn0.eyJnaXZlbl9uYW1lIjoiUmFmYcWCIiwicGVzZWwiOiI4NzA2MTUxMTkxMyIsImlhdCI6MTcyMDAzMzUwNCwiZmFtaWx5X25hbWUiOiJQaWVjaG90YSIsImNsaWVudF9pZCI6IlVTRVItODcwNjE1MTE5MTMtUkFGQcWBLVBJRUNIT1RBIn0.cEcG_lWVHDqWD5_VWp4cqjo-cteNUhmdoWcOCD4phuUp17_F1C27o9q9Ejq1FG5x6Hedl_s4jFB6oS7Fww-KEQ');
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
-        $response = curl_exec($curl);
-        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
-        curl_close($curl);
-        $body = substr($response, $header_size);
-        sleep(3);
-        return json_decode($body);
     }
 }

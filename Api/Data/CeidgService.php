@@ -15,13 +15,25 @@ class CeidgService
 
     public function getDataByNip($nip)
     {
-        if (strlen($nip) == 0) return null;
+        if (strlen($nip) == 0) {
+            return null;
+        }
+        $url = "https://dane.biznes.gov.pl/api/ceidg/v2/firmy?nip=" . $nip;
+        return $this->_makeRequest($url);
+    }
 
+    public function getDataByUrl(string $url)
+    {
+        return $this->_makeRequest($url);
+    }
+
+    private function _makeRequest(string $url)
+    {
         $curl = curl_init();
 
         $xoauth2_bearer = $this->helperData->getXoauth2Bearer();
 
-        curl_setopt($curl, CURLOPT_URL, "https://dane.biznes.gov.pl/api/ceidg/v2/firmy?nip=" . $nip);
+        curl_setopt($curl, CURLOPT_URL, $url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, true);
         curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
@@ -33,7 +45,6 @@ class CeidgService
 
         curl_close($curl);
 
-        $header = substr($response, 0, $header_size);
         $body = substr($response, $header_size);
 
         return json_decode($body);
