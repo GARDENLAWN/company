@@ -1,52 +1,120 @@
 <?php
+declare(strict_types=1);
 
 namespace GardenLawn\Company\Api\Data;
 
+use GardenLawn\Company\Api\Data\Exception\CeidgApiException;
 use GardenLawn\Company\Helper\Data as HelperData;
+use Magento\Framework\HTTP\Client\Curl;
+use Psr\Log\LoggerInterface;
 
 class CeidgService
 {
     protected HelperData $helperData;
+    protected Curl $curlClient;
+    protected LoggerInterface $logger;
 
-    public function __construct(HelperData $helperData)
-    {
+    private array $lastResponseHeaders = [];
+
+    public function __construct(
+        HelperData $helperData,
+        Curl $curlClient,
+        LoggerInterface $logger
+    ) {
         $this->helperData = $helperData;
+        $this->curlClient = $curlClient;
+        $this->logger = $logger;
     }
 
-    public function getDataByNip($nip)
+    /**
+     * Get data by NIP from CEIDG API.
+     *
+     * @param string $nip
+     * @return object|null
+     * @throws CeidgApiException
+     */
+    public function getDataByNip(string $nip): ?object
     {
-        if (strlen($nip) == 0) {
+        if (strlen($nip) === 0) {
             return null;
         }
-        $url = "https://dane.biznes.gov.pl/api/ceidg/v2/firmy?nip=" . $nip;
-        return $this->_makeRequest($url);
+        $url = $this->helperData->getCeidgApiBaseUrl() . "?nip=" . $nip;
+        return $this->makeRequest($url);
     }
 
-    public function getDataByUrl(string $url)
+    /**
+     * Get data by URL from CEIDG API.
+     *
+     * @param string $url
+     * @return object|null
+     * @throws CeidgApiException
+     */
+    public function getDataByUrl(string $url): ?object
     {
-        return $this->_makeRequest($url);
+        return $this->makeRequest($url);
     }
 
-    private function _makeRequest(string $url)
+    /**
+     * Get last response headers.
+     *
+     * @return array
+     */
+    public function getLastResponseHeaders(): array
     {
-        $curl = curl_init();
+        return $this->lastResponseHeaders;
+    }
 
-        $xoauth2_bearer = $this->helperData->getXoauth2Bearer();
+    /**
+     * Make an HTTP request to the CEIDG API.
+     *
+     * @param string $url
+     * @return object|null
+     * @throws CeidgApiException
+     */
+    private function makeRequest(string $url): ?object
+    {
+        $token = $this->helperData->getCeidgApiToken();
+        if (!$token) {
+            $this->logger->error('CEIDG API Token is not configured.');
+            throw new CeidgApiException(__('CEIDG API Token is not configured.'));
+        }
 
-        curl_setopt($curl, CURLOPT_URL, $url);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HEADER, true);
-        curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BEARER);
-        curl_setopt($curl, CURLOPT_XOAUTH2_BEARER, $xoauth2_bearer);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-type: application/json'));
+        $headers = [
+            'Content-type: application/json',
+            'Authorization: Bearer ' . $token
+        ];
 
-        $response = curl_exec($curl);
-        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $this->curlClient->setHeaders($headers);
+        $this->curlClient->get($url);
 
-        curl_close($curl);
+        $status = $this->curlClient->getStatus();
+        $responseBody = $this->curlClient->getBody();
+        $this->lastResponseHeaders = $this->curlClient->getHeaders();
 
-        $body = substr($response, $header_size);
+        if ($status !== 200) {
+            $errorMessage = sprintf(
+                'CEIDG API request to %s failed with status %d. Response: %s',
+                $url,
+                $status,
+                $responseBody
+            );
+            $this->logger->error($errorMessage);
+            throw new CeidgApiException(__($errorMessage));
+        }
 
-        return json_decode($body);
+        $decodedResponse = json_decode($responseBody);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $errorMessage = sprintf(
+                'CEIDG API response for %s could not be decoded. Error: %s. Response: %s',
+                $url,
+                json_last_error_msg(),
+                $responseBody
+            );
+            $this->logger->error($errorMessage);
+            throw new CeidgApiException(__($errorMessage));
+        }
+
+        return $decodedResponse;
     }
 }

@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_xsd.xsd">
+    <system>
+        <tab id="gardenlawn" translate="label" sortOrder="100">
+            <label>GardenLawn</label>
+        </tab>
+        <section id="ceidg_api" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+            <class>separator-top</class>
+            <label>CEIDG API Settings</label>
+            <tab>gardenlawn</tab>
+            <resource>GardenLawn_Company::config_ceidg</resource>
+            <group id="general" translate="label" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                <label>General Settings</label>
+                <field id="base_url" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>CEIDG API Base URL</label>
+                    <comment>Base URL for the CEIDG API.</comment>
+                </field>
+                <field id="pkd_code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>PKD Code</label>
+                    <comment>PKD code to filter companies (e.g., 8130Z).</comment>
+                </field>
+                <field id="voivodeship" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Voivodeship</label>
+                    <comment>Voivodeship to filter companies (e.g., opolskie).</comment>
+                </field>
+                <field id="company_status" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>Company Status</label>
+                    <source_model>GardenLawn\Company\Model\Config\Source\CompanyStatus</source_model>
+                    <comment>Status of companies to retrieve (e.g., AKTYWNY).</comment>
+                </field>
+                <field id="api_token" translate="label" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="0" showInStore="0">
+                    <label>CEIDG API Token</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                    <comment>OAuth2 Bearer Token for CEIDG API access.</comment>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>
