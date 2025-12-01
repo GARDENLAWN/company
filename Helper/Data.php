@@ -71,6 +71,6 @@ class Data extends AbstractHelper
      */
     public function getCeidgApiToken(): ?string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_CEIDG_API_TOKEN, ScopeInterface::SCOPE_STORE);
+        return $this->scopeConfig->getValue(self::XML_PATH_CEIDG_API_TOKEN);
     }
 }
