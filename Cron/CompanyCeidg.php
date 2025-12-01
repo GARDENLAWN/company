@@ -14,7 +14,7 @@ use GardenLawn\Core\Utils\Logger; // Assuming this Logger is still desired for g
 
 class CompanyCeidg
 {
-    protected const DEFAULT_API_SLEEP_SECONDS = 1;
+    protected const DEFAULT_API_SLEEP_SECONDS = 5;
     protected const LONG_API_SLEEP_SECONDS = 5;
     protected const RATE_LIMIT_THRESHOLD = 5; // If remaining requests fall below this, sleep longer
 
