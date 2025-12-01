@@ -9,11 +9,11 @@ use Magento\Store\Model\ScopeInterface;
 
 class Data extends AbstractHelper
 {
-    public const XML_PATH_CEIDG_API_BASE_URL = 'ceidg_api/general/base_url';
-    public const XML_PATH_CEIDG_API_PKD_CODE = 'ceidg_api/general/pkd_code';
-    public const XML_PATH_CEIDG_API_VOIVODESHIP = 'ceidg_api/general/voivodeship';
-    public const XML_PATH_CEIDG_API_COMPANY_STATUS = 'ceidg_api/general/company_status';
-    public const XML_PATH_CEIDG_API_TOKEN = 'ceidg_api/general/api_token';
+    public const string XML_PATH_CEIDG_API_BASE_URL = 'ceidg_api/general/base_url';
+    public const string XML_PATH_CEIDG_API_PKD_CODE = 'ceidg_api/general/pkd_code';
+    public const string XML_PATH_CEIDG_API_VOIVODESHIP = 'ceidg_api/general/voivodeship';
+    public const string XML_PATH_CEIDG_API_COMPANY_STATUS = 'ceidg_api/general/company_status';
+    public const string XML_PATH_CEIDG_API_TOKEN = 'ceidg_api/general/api_token';
 
     /**
      * @param Context $context
