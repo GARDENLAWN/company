@@ -40,7 +40,22 @@ class CeidgService
             return null;
         }
         $url = $this->helperData->getCeidgApiBaseUrl() . "?nip=" . $nip;
-        return $this->makeRequest($url);
+        $response = $this->makeRequest($url);
+
+        if (isset($response->firmy) && count($response->firmy) > 0) {
+            $companyData = $response->firmy[0];
+            $address = $companyData->adresDzialalnosci;
+
+            return (object)[
+                'name' => $companyData->nazwa,
+                'street' => $address->ulica . ' ' . $address->budynek,
+                'postcode' => $address->kod,
+                'city' => $address->miasto,
+                'region_id' => strtolower($address->wojewodztwo)
+            ];
+        }
+
+        return null;
     }
 
     /**
