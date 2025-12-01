@@ -5,6 +5,7 @@
         <sequence>
             <module name="Magento_Backend"/>
             <module name="GardenLawn_Core"/>
+            <module name="Magento_Customer"/>
         </sequence>
     </module>
 </config>
