@@ -5,6 +5,7 @@ namespace GardenLawn\Company\Helper;
 
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
+use Magento\Framework\Encryption\EncryptorInterface;
 use Magento\Store\Model\ScopeInterface;
 
 class Data extends AbstractHelper
@@ -16,12 +17,20 @@ class Data extends AbstractHelper
     public const string XML_PATH_CEIDG_API_TOKEN = 'ceidg_api/general/api_token';
 
     /**
+     * @var EncryptorInterface
+     */
+    private EncryptorInterface $encryptor;
+
+    /**
      * @param Context $context
+     * @param EncryptorInterface $encryptor
      */
     public function __construct(
-        Context $context
+        Context $context,
+        EncryptorInterface $encryptor
     ) {
         parent::__construct($context);
+        $this->encryptor = $encryptor;
     }
 
     /**
@@ -71,6 +80,7 @@ class Data extends AbstractHelper
      */
     public function getCeidgApiToken(): ?string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_CEIDG_API_TOKEN);
+        $token = $this->scopeConfig->getValue(self::XML_PATH_CEIDG_API_TOKEN);
+        return $token ? $this->encryptor->decrypt($token) : null;
     }
 }
