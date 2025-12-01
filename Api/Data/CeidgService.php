@@ -17,10 +17,11 @@ class CeidgService
     private array $lastResponseHeaders = [];
 
     public function __construct(
-        HelperData $helperData,
-        Curl $curlClient,
+        HelperData      $helperData,
+        Curl            $curlClient,
         LoggerInterface $logger
-    ) {
+    )
+    {
         $this->helperData = $helperData;
         $this->curlClient = $curlClient;
         $this->logger = $logger;
@@ -79,12 +80,7 @@ class CeidgService
             throw new CeidgApiException(__('CEIDG API Token is not configured.'));
         }
 
-        $headers = [
-            'Content-type: application/json',
-            'Authorization: Bearer ' . $token
-        ];
-
-        $this->curlClient->setHeaders($headers);
+        $this->curlClient->addHeader('Authorization', 'Bearer ' . $token);
         $this->curlClient->get($url);
 
         $status = $this->curlClient->getStatus();
