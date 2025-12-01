@@ -89,7 +89,6 @@ class FormPostPlugin
 
     private function _buildUrl($route, $params)
     {
-        $url = $this->resultRedirectFactory->create()->getUrl($route, $params);
-        return $url;
+        return $this->resultRedirectFactory->create()->getUrl($route, $params);
     }
 }
