@@ -11,6 +11,7 @@ use GardenLawn\Company\Helper\Data as CompanyHelper;
 use GardenLawn\Company\Api\Data\CeidgService;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Model\Session;
+use Magento\Framework\UrlFactory;
 
 class FormPostPlugin
 {
@@ -21,6 +22,7 @@ class FormPostPlugin
     private RedirectFactory $resultRedirectFactory;
     private AddressRepositoryInterface $addressRepository;
     private Session $customerSession;
+    private UrlFactory $urlFactory;
 
     public function __construct(
         CompanyHelper $companyHelper,
@@ -29,7 +31,8 @@ class FormPostPlugin
         ManagerInterface $messageManager,
         RedirectFactory $resultRedirectFactory,
         AddressRepositoryInterface $addressRepository,
-        Session $customerSession
+        Session $customerSession,
+        UrlFactory $urlFactory
     ) {
         $this->companyHelper = $companyHelper;
         $this->ceidgService = $ceidgService;
@@ -38,14 +41,22 @@ class FormPostPlugin
         $this->resultRedirectFactory = $resultRedirectFactory;
         $this->addressRepository = $addressRepository;
         $this->customerSession = $customerSession;
+        $this->urlFactory = $urlFactory;
     }
 
     public function aroundExecute(FormPost $subject, callable $proceed)
     {
         $isB2bCustomer = in_array($this->companyHelper->getCurrentCustomerGroupId(), $this->companyHelper->getB2bCustomerGroups());
-        $isDefaultBilling = $this->request->getParam('default_billing');
 
-        if ($isB2bCustomer && $isDefaultBilling) {
+        if (!$isB2bCustomer) {
+            return $proceed();
+        }
+
+        $isSavingDefaultBilling = (bool)$this->request->getParam('default_billing');
+        $isSavingDefaultShipping = (bool)$this->request->getParam('default_shipping');
+
+        // Validate only if it's being saved as default billing BUT NOT default shipping.
+        if ($isSavingDefaultBilling && !$isSavingDefaultShipping) {
             $nip = $this->request->getParam('vat_id');
             if ($nip) {
                 try {
@@ -72,13 +83,13 @@ class FormPostPlugin
                     if ($validationError) {
                         $this->messageManager->addErrorMessage(__('The provided address data is not compliant with CEIDG.'));
                         $resultRedirect = $this->resultRedirectFactory->create();
-                        $url = $this->_buildUrl('*/*/edit', ['_secure' => true, 'id' => $this->request->getParam('id')]);
+                        $url = $this->getRedirectUrl();
                         return $resultRedirect->setUrl($url);
                     }
                 } catch (\Exception $e) {
-                    $this->messageManager->addErrorMessage(__('An error occurred while validating CEIDG data.'));
+                    $this->messageManager->addErrorMessage(__('An error occurred while validating CEIDG data: %1', $e->getMessage()));
                     $resultRedirect = $this->resultRedirectFactory->create();
-                    $url = $this->_buildUrl('*/*/edit', ['_secure' => true, 'id' => $this->request->getParam('id')]);
+                    $url = $this->getRedirectUrl();
                     return $resultRedirect->setUrl($url);
                 }
             }
@@ -87,8 +98,12 @@ class FormPostPlugin
         return $proceed();
     }
 
-    private function _buildUrl($route, $params)
+    private function getRedirectUrl(): string
     {
-        return $this->resultRedirectFactory->create()->getUrl($route, $params);
+        $url = $this->urlFactory->create()->getUrl('*/*/edit', ['_secure' => true]);
+        if ($addressId = $this->request->getParam('id')) {
+            $url = $this->urlFactory->create()->getUrl('*/*/edit', ['_secure' => true, 'id' => $addressId]);
+        }
+        return $url;
     }
 }
