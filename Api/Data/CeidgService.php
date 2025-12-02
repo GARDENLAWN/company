@@ -46,16 +46,18 @@ class CeidgService
         if (strlen($nip) === 0) {
             return null;
         }
-        $url = $this->helperData->getCeidgApiBaseUrl() . "?nip=" . $nip;
+        $url = $this->helperData->getCeidgApiBaseUrl() . "firma?nip=" . $nip;
         $response = $this->makeRequest($url);
 
-        if (isset($response->firmy) && count($response->firmy) > 0) {
-            $companyData = $response->firmy[0];
+        if (isset($response->firma) && count($response->firma) > 0) {
+            $companyData = $response->firma[0];
             $address = $companyData->adresDzialalnosci;
 
             return (object)[
-                'name' => $companyData->nazwa,
-                'street' => $address->ulica . ' ' . $address->budynek,
+                'companyName' => $companyData->nazwa,
+                'firstName' => $companyData->wlasciciel->imie,
+                'lastName' => $companyData->wlasciciel->nazwisko,
+                'street' => $address->ulica . ' ' . $address->budynek . '/' . $address->lokal,
                 'postcode' => $address->kod,
                 'city' => $address->miasto,
                 'region_id' => strtolower($address->wojewodztwo)

@@ -5,12 +5,16 @@ namespace GardenLawn\Company\Cron;
 
 use Exception;
 use GardenLawn\Company\Api\Data\CeidgService;
-use GardenLawn\Company\Api\Data\Exception\CeidgApiException; // Added this use statement
+use GardenLawn\Company\Api\Data\Exception\CeidgApiException;
+
+// Added this use statement
 use GardenLawn\Company\Enum\Status;
 use GardenLawn\Company\Helper\Data as CompanyHelper;
 use GardenLawn\Company\Model\CompanyFactory;
 use GardenLawn\Company\Model\ResourceModel\Company as CompanyResource;
-use GardenLawn\Core\Utils\Logger; // Assuming this Logger is still desired for general logging
+use GardenLawn\Core\Utils\Logger;
+
+// Assuming this Logger is still desired for general logging
 
 class CompanyCeidg
 {
@@ -24,11 +28,12 @@ class CompanyCeidg
     protected CompanyHelper $companyHelper;
 
     public function __construct(
-        CeidgService $ceidgService,
-        CompanyFactory $companyFactory,
+        CeidgService    $ceidgService,
+        CompanyFactory  $companyFactory,
         CompanyResource $companyResource,
-        CompanyHelper $companyHelper
-    ) {
+        CompanyHelper   $companyHelper
+    )
+    {
         $this->ceidgService = $ceidgService;
         $this->companyFactory = $companyFactory;
         $this->companyResource = $companyResource;
@@ -40,7 +45,7 @@ class CompanyCeidg
      */
     public function execute(): void
     {
-        $baseUrl = $this->companyHelper->getCeidgApiBaseUrl();
+        $baseUrl = $this->companyHelper->getCeidgApiBaseUrl() . 'firmy';
         $pkdCode = $this->companyHelper->getCeidgApiPkdCode();
         $voivodeship = $this->companyHelper->getCeidgApiVoivodeship();
         $companyApiStatus = $this->companyHelper->getCeidgApiCompanyStatus(); // Renamed to avoid conflict
@@ -105,7 +110,6 @@ class CompanyCeidg
                                         (property_exists($a, 'miasto') ? $a->miasto : "");
                                     $distance = 0; // This seems to be a default value, consider if it should be dynamic
 
-                                    /** @var \GardenLawn\Company\Model\Company $company */
                                     $company = $this->companyFactory->create();
                                     $this->companyResource->load($company, $nip, 'nip'); // Load by NIP
 

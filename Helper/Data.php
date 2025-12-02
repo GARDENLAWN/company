@@ -52,7 +52,7 @@ class Data extends AbstractHelper implements ArgumentInterface
      */
     public function getCeidgApiBaseUrl(): string
     {
-        return $this->scopeConfig->getValue(self::XML_PATH_CEIDG_API_BASE_URL, ScopeInterface::SCOPE_STORE) ?? "https://dane.biznes.gov.pl/api/ceidg/v2/firmy";
+        return $this->scopeConfig->getValue(self::XML_PATH_CEIDG_API_BASE_URL, ScopeInterface::SCOPE_STORE) ?? "https://dane.biznes.gov.pl/api/ceidg/v3/";
     }
 
     /**

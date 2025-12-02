@@ -100,8 +100,6 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
             $shippingAddressCreated = true;
         }
 
-        $this->customerRepository->save($customer);
-
         $message = __('Customer\'s billing address has been updated based on CEIDG data.');
         if ($shippingAddressCreated) {
             $message .= ' ' . __('A new default shipping address was also created.');
@@ -125,14 +123,15 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
 
     private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData, CustomerInterface $customerData): void
     {
-        $address->setFirstname($customerData->getFirstname())
-            ->setLastname($customerData->getLastname())
-            ->setCompany($ceidgData->name)
+        $address->setFirstname($ceidgData->firstName)
+            ->setLastname($ceidgData->lastName)
+            ->setCompany($ceidgData->companyName)
             ->setVatId($customerData->getTaxvat())
             ->setCountryId('PL')
             ->setPostcode($ceidgData->postcode)
             ->setCity($ceidgData->city)
             ->setStreet([$ceidgData->street])
+            ->setRegionId($ceidgData->region_id)
             ->setTelephone('000000000'); // Telephone is required
     }
 }
