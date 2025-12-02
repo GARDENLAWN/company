@@ -44,9 +44,14 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
 
     public function execute(Observer $observer): void
     {
-        $customer = $observer->getEvent()->getCustomer();
+        $customerModel = $observer->getEvent()->getCustomer();
+        $customerId = $customerModel->getId();
+        if (!$customerId) {
+            return;
+        }
 
         try {
+            $customer = $this->customerRepository->getById($customerId);
             $groupId = (int)$customer->getGroupId();
             if (in_array($groupId, $this->companyHelper->getB2bCustomerGroups())) {
                 $this->handleB2bAddressUpdate($customer);
@@ -78,7 +83,7 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
         $shippingAddressCreated = false;
 
         // Always create/update the default billing address
-        $billingAddress = $this->getOrCreateAddress($customer->getId(), $billingAddressId);
+        $billingAddress = $this->getOrCreateAddress((int)$customer->getId(), $billingAddressId);
         $this->updateAddressFromCeidg($billingAddress, $ceidgData, $customer);
         $billingAddress->setIsDefaultBilling(true);
         $savedBillingAddress = $this->addressRepository->save($billingAddress);
