@@ -69,29 +69,6 @@ class Modifier implements ModifierInterface
                     ],
                 ];
             }
-
-            // Only show the button if the customer has a confirmation token
-            if ($customer->getConfirmation()) {
-                $meta['customer']['children']['customer']['children']['force_confirm_button'] = [
-                    'arguments' => [
-                        'data' => [
-                            'config' => [
-                                'formElement' => 'container',
-                                'componentType' => 'container',
-                                'component' => 'Magento_Ui/js/form/components/button',
-                                'title' => __('Force Confirm Account'),
-                                'actions' => [
-                                    [
-                                        'targetName' => 'customer_form.customer_form',
-                                        'actionName' => 'forceConfirm',
-                                    ]
-                                ],
-                                'sortOrder' => 26, // After Group and before First Name
-                            ],
-                        ],
-                    ],
-                ];
-            }
         } catch (Exception) {
             // Customer not found or other error, do nothing to the meta
         }
