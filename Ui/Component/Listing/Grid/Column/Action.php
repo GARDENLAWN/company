@@ -11,9 +11,9 @@ use Magento\Ui\Component\Listing\Columns\Column;
 
 class Action extends Column
 {
-    const string ROW_EDIT_URL = 'company/grid/addrow';
-    const string ROW_CUSTOMER_CREATE_URL = 'company/grid/createcustomer';
-    const string ROW_CUSTOMER_SEND_EMAIL_URL = 'company/grid/sendemail';
+    const string ROW_EDIT_URL = 'gardenlawn_company/grid/addrow';
+    const string ROW_CUSTOMER_CREATE_URL = 'gardenlawn_company/grid/createcustomer';
+    const string ROW_CUSTOMER_SEND_EMAIL_URL = 'gardenlawn_company/grid/sendemail';
     protected UrlInterface $_urlBuilder;
     private string $_editUrl;
     private string $_customerCreateUrl;

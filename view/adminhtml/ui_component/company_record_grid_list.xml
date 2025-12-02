@@ -75,7 +75,7 @@
                     <item name="config" xsi:type="array">
                         <item name="type" xsi:type="string">delete</item>
                         <item name="label" xsi:type="string" translate="true">Delete</item>
-                        <item name="url" xsi:type="url" path="company/grid/MassDelete"/>
+                        <item name="url" xsi:type="url" path="gardenlawn_company/grid/MassDelete"/>
                         <item name="confirm" xsi:type="array">
                             <item name="title" xsi:type="string" translate="true">Delete</item>
                             <item name="message" xsi:type="string" translate="true">Do you want to delete selected row

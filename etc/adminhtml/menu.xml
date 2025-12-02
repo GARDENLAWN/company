@@ -8,7 +8,7 @@
              dependsOnModule="GardenLawn_Company" resource="GardenLawn_Company::manager"/>
         <add id="GardenLawn_Company::add_row" title="All Companies" translate="title"
              module="GardenLawn_Company" parent="GardenLawn_Company::manager" sortOrder="10"
-             dependsOnModule="GardenLawn_Company" action="company/grid"
+             dependsOnModule="GardenLawn_Company" action="gardenlawn_company/grid"
              resource="GardenLawn_Company::manager"/>
     </menu>
 </config>

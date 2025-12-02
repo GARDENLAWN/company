@@ -52,7 +52,7 @@ class AddRow extends Action
             $rowTitle = $rowData->getTitle();
             if (!$rowData->getCompanyId()) {
                 $this->messageManager->addError(__('row data no longer exist.'));
-                $this->_redirect('company/grid/rowdata');
+                $this->_redirect('gardenlawn_company/grid/rowdata');
             }
         }
 

@@ -62,7 +62,7 @@ class CreateCustomer extends Action
             $rowData = $rowData->load($rowId);
             if (!$rowData->getCompanyId()) {
                 $this->messageManager->addError(__('row data no longer exist.'));
-                $this->_redirect('company/grid/rowdata');
+                $this->_redirect('gardenlawn_company/grid/rowdata');
             }
 
             try {
@@ -109,7 +109,7 @@ class CreateCustomer extends Action
             }
         }
 
-        $this->_redirect(isset($data['id']) ? 'company/grid/addrow/id/' . $data['id'] : 'company/grid/index');
+        $this->_redirect(isset($data['id']) ? 'gardenlawn_company/grid/addrow/id/' . $data['id'] : 'gardenlawn_company/grid/index');
     }
 
     /**
