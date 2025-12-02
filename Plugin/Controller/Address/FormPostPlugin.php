@@ -132,14 +132,15 @@ class FormPostPlugin
 
     private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData): void
     {
-        $address->setFirstname($this->request->getParam('firstname'))
-            ->setLastname($this->request->getParam('lastname'))
-            ->setCompany($ceidgData->name)
+        $address->setFirstname($ceidgData->firstName)
+            ->setLastname($ceidgData->lastName)
+            ->setCompany($ceidgData->companyName)
             ->setVatId($this->request->getParam('vat_id'))
             ->setCountryId('PL')
             ->setPostcode($ceidgData->postcode)
             ->setCity($ceidgData->city)
-            ->setStreet([$ceidgData->street]) // Pass street as an array with one element
+            ->setStreet([$ceidgData->street])
+            ->setRegionId($ceidgData->region_id)
             ->setTelephone('000000000'); // Telephone is required
     }
 
