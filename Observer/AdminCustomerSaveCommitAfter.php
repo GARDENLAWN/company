@@ -110,8 +110,6 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
             $shippingAddressCreated = true;
         }
 
-        $this->customerRepository->save($customer);
-
         $message = __('Customer\'s billing address has been updated based on CEIDG data.');
         if ($shippingAddressCreated) {
             $message .= ' ' . __('A new default shipping address was also created.');
