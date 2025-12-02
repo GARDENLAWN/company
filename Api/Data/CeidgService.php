@@ -14,25 +14,6 @@ class CeidgService
     private const string CACHE_KEY_PREFIX = 'ceidg_api_';
     private const int CACHE_LIFETIME = 86400; // 24 hours
 
-    private const array POLISH_REGION_MAP = [
-        'dolnośląskie' => 506,
-        'kujawsko-pomorskie' => 507,
-        'lubelskie' => 508,
-        'lubuskie' => 509,
-        'łódzkie' => 510,
-        'małopolskie' => 511,
-        'mazowieckie' => 512,
-        'opolskie' => 513,
-        'podkarpackie' => 514,
-        'podlaskie' => 515,
-        'pomorskie' => 516,
-        'śląskie' => 517,
-        'świętokrzyskie' => 518,
-        'warmińsko-mazurskie' => 519,
-        'wielkopolskie' => 520,
-        'zachodniopomorskie' => 521,
-    ];
-
     protected HelperData $helperData;
     protected Curl $curlClient;
     protected LoggerInterface $logger;
@@ -80,24 +61,12 @@ class CeidgService
                 'street' => $address->ulica . ' ' . $address->budynek . (property_exists($address, 'lokal') ? "/" . $address->lokal : ""),
                 'postcode' => $address->kod,
                 'city' => $address->miasto,
-                'region_id' => $this->getRegionId($address->wojewodztwo)
+                'region' => $address->wojewodztwo
             ];
         }
 
         return null;
     }
-
-    /**
-     * Get region ID from voivodeship name.
-     *
-     * @param string $regionString
-     * @return int|null
-     */
-    private function getRegionId(string $regionString): ?int
-    {
-        return self::POLISH_REGION_MAP[strtolower($regionString)] ?? null;
-    }
-
 
     /**
      * Get data by URL from CEIDG API.

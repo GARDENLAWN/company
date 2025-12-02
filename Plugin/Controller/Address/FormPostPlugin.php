@@ -9,6 +9,7 @@ use Magento\Customer\Api\Data\AddressInterface;
 use Magento\Customer\Api\Data\AddressInterfaceFactory;
 use Magento\Customer\Controller\Address\FormPost;
 use Magento\Customer\Model\Session;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\RedirectFactory;
 use Magento\Framework\Exception\LocalizedException;
@@ -16,9 +17,12 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\UrlFactory;
 use GardenLawn\Company\Api\Data\CeidgService;
 use GardenLawn\Company\Helper\Data as CompanyHelper;
+use GardenLawn\Company\Model\RegionFinderTrait;
 
 class FormPostPlugin
 {
+    use RegionFinderTrait;
+
     private CompanyHelper $companyHelper;
     private CeidgService $ceidgService;
     private RequestInterface $request;
@@ -29,6 +33,7 @@ class FormPostPlugin
     private Session $customerSession;
     private UrlFactory $urlFactory;
     private AddressInterfaceFactory $addressFactory;
+    private RegionFactory $regionFactory;
 
     public function __construct(
         CompanyHelper $companyHelper,
@@ -40,7 +45,8 @@ class FormPostPlugin
         CustomerRepositoryInterface $customerRepository,
         Session $customerSession,
         UrlFactory $urlFactory,
-        AddressInterfaceFactory $addressFactory
+        AddressInterfaceFactory $addressFactory,
+        RegionFactory $regionFactory
     ) {
         $this->companyHelper = $companyHelper;
         $this->ceidgService = $ceidgService;
@@ -52,6 +58,7 @@ class FormPostPlugin
         $this->customerSession = $customerSession;
         $this->urlFactory = $urlFactory;
         $this->addressFactory = $addressFactory;
+        $this->regionFactory = $regionFactory;
     }
 
     /**
@@ -135,6 +142,8 @@ class FormPostPlugin
 
     private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData): void
     {
+        $regionId = $this->getRegionIdByName($ceidgData->region, 'PL');
+
         $address->setFirstname($ceidgData->firstName)
             ->setLastname($ceidgData->lastName)
             ->setCompany($ceidgData->companyName)
@@ -143,7 +152,7 @@ class FormPostPlugin
             ->setPostcode($ceidgData->postcode)
             ->setCity($ceidgData->city)
             ->setStreet([$ceidgData->street])
-            ->setRegionId($ceidgData->region_id)
+            ->setRegionId($regionId)
             ->setTelephone('000000000'); // Telephone is required
     }
 

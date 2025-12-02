@@ -5,6 +5,8 @@ namespace GardenLawn\Company\Observer;
 
 use Exception;
 use GardenLawn\Company\Api\Data\Exception\CeidgApiException;
+use GardenLawn\Company\Model\RegionFinderTrait;
+use Magento\Directory\Model\RegionFactory;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Customer\Api\AddressRepositoryInterface;
@@ -19,12 +21,15 @@ use GardenLawn\Company\Helper\Data as CompanyHelper;
 
 class AdminCustomerSaveCommitAfter implements ObserverInterface
 {
+    use RegionFinderTrait;
+
     private CompanyHelper $companyHelper;
     private CeidgService $ceidgService;
     private AddressRepositoryInterface $addressRepository;
     private CustomerRepositoryInterface $customerRepository;
     private AddressInterfaceFactory $addressFactory;
     private ManagerInterface $messageManager;
+    private RegionFactory $regionFactory;
 
     public function __construct(
         CompanyHelper $companyHelper,
@@ -32,7 +37,8 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
         AddressRepositoryInterface $addressRepository,
         CustomerRepositoryInterface $customerRepository,
         AddressInterfaceFactory $addressFactory,
-        ManagerInterface $messageManager
+        ManagerInterface $messageManager,
+        RegionFactory $regionFactory
     ) {
         $this->companyHelper = $companyHelper;
         $this->ceidgService = $ceidgService;
@@ -40,6 +46,7 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
         $this->customerRepository = $customerRepository;
         $this->addressFactory = $addressFactory;
         $this->messageManager = $messageManager;
+        $this->regionFactory = $regionFactory;
     }
 
     public function execute(Observer $observer): void
@@ -103,6 +110,8 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
             $shippingAddressCreated = true;
         }
 
+        $this->customerRepository->save($customer);
+
         $message = __('Customer\'s billing address has been updated based on CEIDG data.');
         if ($shippingAddressCreated) {
             $message .= ' ' . __('A new default shipping address was also created.');
@@ -126,6 +135,8 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
 
     private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData, CustomerInterface $customerData): void
     {
+        $regionId = $this->getRegionIdByName($ceidgData->region, 'PL');
+
         $address->setFirstname($ceidgData->firstName)
             ->setLastname($ceidgData->lastName)
             ->setCompany($ceidgData->companyName)
@@ -134,7 +145,7 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
             ->setPostcode($ceidgData->postcode)
             ->setCity($ceidgData->city)
             ->setStreet([$ceidgData->street])
-            ->setRegionId($ceidgData->region_id)
+            ->setRegionId($regionId)
             ->setTelephone('000000000'); // Telephone is required
     }
 }
