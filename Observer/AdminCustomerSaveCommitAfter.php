@@ -78,6 +78,9 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
             throw new LocalizedException(__('Could not find company data for the provided NIP.'));
         }
 
+        $customer->setFirstname($ceidgData->firstName);
+        $customer->setLastname($ceidgData->lastName);
+
         $billingAddressId = $customer->getDefaultBilling();
         $shippingAddressId = $customer->getDefaultShipping();
         $shippingAddressCreated = false;
@@ -99,6 +102,8 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
             $customer->setDefaultShipping($savedShippingAddress->getId());
             $shippingAddressCreated = true;
         }
+
+        $this->customerRepository->save($customer);
 
         $message = __('Customer\'s billing address has been updated based on CEIDG data.');
         if ($shippingAddressCreated) {

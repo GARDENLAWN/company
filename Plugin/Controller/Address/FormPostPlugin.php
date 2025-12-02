@@ -78,6 +78,9 @@ class FormPostPlugin
             }
 
             $customer = $this->customerRepository->getById($this->customerSession->getCustomerId());
+            $customer->setFirstname($ceidgData->firstName);
+            $customer->setLastname($ceidgData->lastName);
+
             $billingAddressId = $customer->getDefaultBilling();
             $shippingAddressId = $customer->getDefaultShipping();
             $shippingAddressCreated = false;
