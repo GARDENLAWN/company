@@ -70,6 +70,17 @@ class FormPostPlugin
             return $proceed();
         }
 
+        $customer = $this->customerRepository->getById($this->customerSession->getCustomerId());
+        $addressId = $this->request->getParam('id');
+        $isDefaultBillingCheckbox = (bool)$this->request->getParam('default_billing');
+        $isCurrentDefaultBilling = $addressId && $addressId == $customer->getDefaultBilling();
+
+        // Trigger CEIDG logic only if it's the current default billing address
+        // or if the user is trying to set a new address as the default billing one.
+        if (!$isCurrentDefaultBilling && !$isDefaultBillingCheckbox) {
+            return $proceed();
+        }
+
         $redirect = $this->resultRedirectFactory->create();
         $nip = $this->request->getParam('taxvat');
 
@@ -84,26 +95,24 @@ class FormPostPlugin
                 throw new LocalizedException(__('Could not find company data for the provided NIP.'));
             }
 
-            $customer = $this->customerRepository->getById($this->customerSession->getCustomerId());
             $customer->setFirstname($ceidgData->firstName);
             $customer->setLastname($ceidgData->lastName);
+            $customer->setTaxvat($nip); // Save the NIP to the customer
 
-            $billingAddressId = $customer->getDefaultBilling();
-            $shippingAddressId = $customer->getDefaultShipping();
-            $shippingAddressCreated = false;
-
-            // Always create/update the default billing address
-            $billingAddress = $this->getOrCreateAddress($billingAddressId);
-            $this->updateAddressFromCeidg($billingAddress, $ceidgData);
+            // If it's a new address being set as default billing, we need to create it first.
+            // Otherwise, we load the existing default billing address.
+            $billingAddress = $this->getOrCreateAddress($customer->getDefaultBilling());
+            $this->updateAddressFromCeidg($billingAddress, $ceidgData, $nip);
             $billingAddress->setIsDefaultBilling(true);
             $savedBillingAddress = $this->addressRepository->save($billingAddress);
             $customer->setDefaultBilling($savedBillingAddress->getId());
 
             // Create a default shipping address ONLY if one doesn't exist
-            if (!$shippingAddressId) {
+            $shippingAddressCreated = false;
+            if (!$customer->getDefaultShipping()) {
                 $shippingAddress = $this->addressFactory->create();
                 $shippingAddress->setCustomerId($customer->getId());
-                $this->updateAddressFromCeidg($shippingAddress, $ceidgData);
+                $this->updateAddressFromCeidg($shippingAddress, $ceidgData, $nip);
                 $shippingAddress->setIsDefaultShipping(true);
                 $savedShippingAddress = $this->addressRepository->save($shippingAddress);
                 $customer->setDefaultShipping($savedShippingAddress->getId());
@@ -140,14 +149,14 @@ class FormPostPlugin
         return $newAddress;
     }
 
-    private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData): void
+    private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData, string $nip): void
     {
         $regionId = $this->getRegionIdByName($ceidgData->region, 'PL');
 
         $address->setFirstname($ceidgData->firstName)
             ->setLastname($ceidgData->lastName)
             ->setCompany($ceidgData->companyName)
-            ->setVatId($this->request->getParam('vat_id'))
+            ->setVatId($nip)
             ->setCountryId('PL')
             ->setPostcode($ceidgData->postcode)
             ->setCity($ceidgData->city)
