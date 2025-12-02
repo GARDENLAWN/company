@@ -57,7 +57,7 @@ class CeidgService
                 'companyName' => $companyData->nazwa,
                 'firstName' => $companyData->wlasciciel->imie,
                 'lastName' => $companyData->wlasciciel->nazwisko,
-                'street' => $address->ulica . ' ' . $address->budynek . '/' . $address->lokal,
+                'street' => $address->ulica . ' ' . $address->budynek . (property_exists($address, 'lokal') ? "/" . $address->lokal : ""),
                 'postcode' => $address->kod,
                 'city' => $address->miasto,
                 'region_id' => strtolower($address->wojewodztwo)

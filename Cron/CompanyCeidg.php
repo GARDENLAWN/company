@@ -105,7 +105,8 @@ class CompanyCeidg
                                     $link = $companyData->link;
                                     $a = $companyData->adresDzialalnosci;
                                     $address = (property_exists($a, 'ulica') ? $a->ulica . " " : (property_exists($a, 'miasto') ? $a->miasto . " " : "")) .
-                                        (property_exists($a, 'budynek') ? $a->budynek . ", " : "") .
+                                        (property_exists($a, 'budynek') ? $a->budynek : "") .
+                                        (property_exists($a, 'lokal') ? "/" . $a->lokal . ", " : ", ") .
                                         (property_exists($a, 'kod') ? $a->kod . " " : "") .
                                         (property_exists($a, 'miasto') ? $a->miasto : "");
                                     $distance = 0; // This seems to be a default value, consider if it should be dynamic
