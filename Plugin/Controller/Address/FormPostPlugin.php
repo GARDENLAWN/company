@@ -71,7 +71,7 @@ class FormPostPlugin
         }
 
         $redirect = $this->resultRedirectFactory->create();
-        $nip = $this->request->getParam('vat_id');
+        $nip = $this->request->getParam('taxvat');
 
         if (!$nip) {
             $this->messageManager->addErrorMessage(__('NIP is a required field for B2B customers.'));

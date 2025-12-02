@@ -76,7 +76,6 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
     {
         $taxvat = $customer->getTaxvat();
         if (!$taxvat) {
-            $this->messageManager->addWarningMessage(__('NIP was not provided. B2B addresses were not updated.'));
             return;
         }
 
