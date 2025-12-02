@@ -68,6 +68,7 @@ class Modifier implements ModifierInterface
                                 'componentType' => 'field',
                                 'formElement' => 'checkbox',
                                 'dataType' => 'boolean',
+                                'dataScope' => 'force_confirm', // This was missing
                                 'prefer' => 'toggle',
                                 'valueMap' => [
                                     'true' => '1',

@@ -66,7 +66,7 @@ class AdminCustomerSaveAfter implements ObserverInterface
                 $shippingAddressCreated = false;
 
                 // Always create/update the default billing address
-                $billingAddress = $this->getOrCreateAddress($customer->getId(), $billingAddressId);
+                $billingAddress = $this->getOrCreateAddress((int)$customer->getId(), $billingAddressId);
                 $this->updateAddressFromCeidg($billingAddress, $ceidgData, $customerDataObject);
                 $billingAddress->setIsDefaultBilling(true);
                 $savedBillingAddress = $this->addressRepository->save($billingAddress);
@@ -101,7 +101,7 @@ class AdminCustomerSaveAfter implements ObserverInterface
     {
         if ($addressId) {
             try {
-                return $this->addressRepository->getById($addressId);
+                return $this->addressRepository->getById((int)$addressId);
             } catch (Exception) {
                 // Not found, create new
             }
