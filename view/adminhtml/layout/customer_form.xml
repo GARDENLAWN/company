@@ -1,27 +1,16 @@
 <?xml version="1.0"?>
 <page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
     <body>
-        <referenceContainer name="content">
-            <uiComponent name="customer_form"/>
-        </referenceContainer>
         <referenceBlock name="customer_form">
             <arguments>
                 <argument name="js_config" xsi:type="array">
-                    <item name="provider" xsi:type="string">customer_form.customer_form_data_source</item>
-                    <item name="deps" xsi:type="string">customer_form.customer_form_data_source</item>
+                    <item name="components" xsi:type="array">
+                        <item name="customer_form" xsi:type="array">
+                            <item name="component" xsi:type="string">GardenLawn_Company/js/form/components/customer_form</item>
+                        </item>
+                    </item>
                 </argument>
             </arguments>
-            <settings>
-                <deps>
-                    <dep>customer_form.customer_form_data_source</dep>
-                </deps>
-                <imports>
-                    <link name="customer_form.areas.account.children.force_confirm_button.actions.0.params.0">${ $.provider }:data.links.confirmUrl</link>
-                </imports>
-                <exports>
-                    <link name="customer_form.areas.account.children.force_confirm_button.actions.0.params.0">${ $.provider }:data.links.confirmUrl</link>
-                </exports>
-            </settings>
         </referenceBlock>
     </body>
 </page>

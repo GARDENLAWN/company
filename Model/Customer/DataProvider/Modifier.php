@@ -31,6 +31,14 @@ class Modifier implements ModifierInterface
 
     public function modifyData(array $data): array
     {
+        $customerId = $this->request->getParam('id');
+        if (!$customerId) {
+            return $data;
+        }
+        // The button doesn't have a data scope, but we need to provide the URL to the UI component
+        if (isset($data[$customerId])) {
+            $data[$customerId]['links']['confirmUrl'] = $this->urlBuilder->getUrl('gardenlawn_company/index/confirm', ['id' => $customerId]);
+        }
         return $data;
     }
 
@@ -46,26 +54,25 @@ class Modifier implements ModifierInterface
             $groupId = (int)$customer->getGroupId();
 
             if (in_array($groupId, $this->companyHelper->getB2bCustomerGroups())) {
-                $meta['addresses']['children'] = [
-                    'b2b_message' => [
-                        'arguments' => [
-                            'data' => [
-                                'config' => [
-                                    'formElement' => 'container',
-                                    'componentType' => 'container',
-                                    'component' => 'Magento_Ui/js/form/components/html',
-                                    'additionalClasses' => 'admin__fieldset-note',
-                                    'content' => __('The billing address for this B2B customer is synchronized with CEIDG. The shipping address can be managed from the customer\'s account in the storefront.'),
-                                ],
+                $meta['address']['children']['address']['children']['b2b_message'] = [
+                    'arguments' => [
+                        'data' => [
+                            'config' => [
+                                'formElement' => 'container',
+                                'componentType' => 'container',
+                                'component' => 'Magento_Ui/js/form/components/html',
+                                'additionalClasses' => 'admin__fieldset-note',
+                                'content' => __('The billing address for this B2B customer is synchronized with CEIDG. The shipping address can be managed from the customer\'s account in the storefront.'),
+                                'sortOrder' => 0,
                             ],
                         ],
                     ],
                 ];
             }
 
+            // Only show the button if the customer has a confirmation token
             if ($customer->getConfirmation()) {
-                $confirmUrl = $this->urlBuilder->getUrl('customer/index/confirm', ['id' => $customerId]);
-                $meta['account']['children']['force_confirm_button'] = [
+                $meta['customer']['children']['customer']['children']['force_confirm_button'] = [
                     'arguments' => [
                         'data' => [
                             'config' => [
@@ -77,12 +84,9 @@ class Modifier implements ModifierInterface
                                     [
                                         'targetName' => 'customer_form.customer_form',
                                         'actionName' => 'forceConfirm',
-                                        'params' => [
-                                            $confirmUrl
-                                        ]
                                     ]
                                 ],
-                                'sortOrder' => 25,
+                                'sortOrder' => 26, // After Group and before First Name
                             ],
                         ],
                     ],
