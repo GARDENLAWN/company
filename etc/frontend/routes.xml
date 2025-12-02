@@ -2,7 +2,7 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="standard">
-        <route frontName="company" id="company">
+        <route frontName="gardenlawn_company" id="gardenlawn_company">
             <module name="GardenLawn_Company"/>
         </route>
     </router>
