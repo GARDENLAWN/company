@@ -125,8 +125,6 @@ class SavePlugin
 
     private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData, array $customerData): void
     {
-        $streetParts = explode(' ', $ceidgData->street, 2);
-
         $address->setFirstname($customerData['firstname'])
             ->setLastname($customerData['lastname'])
             ->setCompany($ceidgData->name)
@@ -134,7 +132,7 @@ class SavePlugin
             ->setCountryId('PL')
             ->setPostcode($ceidgData->postcode)
             ->setCity($ceidgData->city)
-            ->setStreet([$streetParts[0], $streetParts[1] ?? ''])
-            ->setTelephone('123456789'); // Telephone is required
+            ->setStreet([$ceidgData->street]) // Pass street as an array with one element
+            ->setTelephone('000000000'); // Telephone is required
     }
 }

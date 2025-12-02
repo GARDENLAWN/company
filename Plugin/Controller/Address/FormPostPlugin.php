@@ -132,8 +132,6 @@ class FormPostPlugin
 
     private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData): void
     {
-        $streetParts = explode(' ', $ceidgData->street, 2);
-
         $address->setFirstname($this->request->getParam('firstname'))
             ->setLastname($this->request->getParam('lastname'))
             ->setCompany($ceidgData->name)
@@ -141,8 +139,8 @@ class FormPostPlugin
             ->setCountryId('PL')
             ->setPostcode($ceidgData->postcode)
             ->setCity($ceidgData->city)
-            ->setStreet([$streetParts[0], $streetParts[1] ?? ''])
-            ->setTelephone('123456789'); // Telephone is required
+            ->setStreet([$ceidgData->street]) // Pass street as an array with one element
+            ->setTelephone('000000000'); // Telephone is required
     }
 
     private function getRedirectUrl(): string
