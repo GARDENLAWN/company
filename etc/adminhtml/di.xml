@@ -5,4 +5,11 @@
                 type="GardenLawn\Company\Plugin\Controller\Adminhtml\Index\SavePlugin"
                 sortOrder="10" />
     </type>
+    <type name="Magento\Customer\Model\Customer\DataProviderWithDefaultAddresses">
+        <arguments>
+            <argument name="modifiers" xsi:type="array">
+                <item name="b2b-address-modifier" xsi:type="object">GardenLawn\Company\Model\Customer\DataProvider\Modifier</item>
+            </argument>
+        </arguments>
+    </type>
 </config>

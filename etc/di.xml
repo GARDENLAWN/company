@@ -61,4 +61,9 @@
             <argument name="modifier" xsi:type="object">GardenLawn\Company\Model\Customer\DataProvider\Modifier</argument>
         </arguments>
     </type>
+    <type name="Magento\Customer\Controller\Address\FormPost">
+        <plugin name="gardenlawn_company_address_validation"
+                type="GardenLawn\Company\Plugin\Controller\Address\FormPostPlugin"
+                sortOrder="10" />
+    </type>
 </config>

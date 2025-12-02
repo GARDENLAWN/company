@@ -3,58 +3,63 @@ declare(strict_types=1);
 
 namespace GardenLawn\Company\Model\Customer\DataProvider;
 
-use Magento\Customer\Api\Data\CustomerInterface;
-use Magento\Customer\Model\Customer\DataProviderWithDefaultAddresses;
+use Exception;
+use Magento\Ui\DataProvider\Modifier\ModifierInterface;
+use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Framework\App\RequestInterface;
-use Magento\Ui\Component\Form\Fieldset;
 use GardenLawn\Company\Helper\Data as CompanyHelper;
 
-class Modifier extends \Magento\Customer\Model\Customer\DataProvider\Modifier
+class Modifier implements ModifierInterface
 {
     private CompanyHelper $companyHelper;
     private RequestInterface $request;
+    private CustomerRepositoryInterface $customerRepository;
 
     public function __construct(
-        DataProviderWithDefaultAddresses $dataProvider,
         CompanyHelper $companyHelper,
-        RequestInterface $request
+        RequestInterface $request,
+        CustomerRepositoryInterface $customerRepository
     ) {
-        parent::__construct($dataProvider);
         $this->companyHelper = $companyHelper;
         $this->request = $request;
+        $this->customerRepository = $customerRepository;
     }
 
-    public function modifyData(array $data)
+    public function modifyData(array $data): array
     {
-        return parent::modifyData($data);
+        return $data;
     }
 
-    public function modifyMeta(array $meta)
+    public function modifyMeta(array $meta): array
     {
         $customerId = $this->request->getParam('id');
         if (!$customerId) {
             return $meta;
         }
 
-        $customer = $this->dataProvider->getCustomer($customerId);
-        $groupId = (int)$customer->getGroupId();
+        try {
+            $customer = $this->customerRepository->getById($customerId);
+            $groupId = (int)$customer->getGroupId();
 
-        if (in_array($groupId, $this->companyHelper->getB2bCustomerGroups())) {
-            // Hide address fields and show a message
-            $meta['addresses']['children'] = [
-                'b2b_message' => [
-                    'arguments' => [
-                        'data' => [
-                            'config' => [
-                                'componentType' => 'container',
-                                'component' => 'Magento_Ui/js/form/components/html',
-                                'additionalClasses' => 'admin__fieldset-note',
-                                'content' => __('The billing address for this B2B customer is synchronized with CEIDG. The shipping address can be managed from the customer\'s account in the storefront.'),
+            if (in_array($groupId, $this->companyHelper->getB2bCustomerGroups())) {
+                $meta['addresses']['children'] = [
+                    'b2b_message' => [
+                        'arguments' => [
+                            'data' => [
+                                'config' => [
+                                    'formElement' => 'container',
+                                    'componentType' => 'container',
+                                    'component' => 'Magento_Ui/js/form/components/html',
+                                    'additionalClasses' => 'admin__fieldset-note',
+                                    'content' => __('The billing address for this B2B customer is synchronized with CEIDG. The shipping address can be managed from the customer\'s account in the storefront.'),
+                                ],
                             ],
                         ],
                     ],
-                ],
-            ];
+                ];
+            }
+        } catch (Exception) {
+            // Customer not found or other error, do nothing to the meta
         }
 
         return $meta;
