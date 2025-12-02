@@ -12,7 +12,6 @@ use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\AddressInterface;
 use Magento\Customer\Api\Data\AddressInterfaceFactory;
 use Magento\Customer\Api\Data\CustomerInterface;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface;
 use GardenLawn\Company\Api\Data\CeidgService;
@@ -26,7 +25,6 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
     private CustomerRepositoryInterface $customerRepository;
     private AddressInterfaceFactory $addressFactory;
     private ManagerInterface $messageManager;
-    private RequestInterface $request;
 
     public function __construct(
         CompanyHelper $companyHelper,
@@ -34,8 +32,7 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
         AddressRepositoryInterface $addressRepository,
         CustomerRepositoryInterface $customerRepository,
         AddressInterfaceFactory $addressFactory,
-        ManagerInterface $messageManager,
-        RequestInterface $request
+        ManagerInterface $messageManager
     ) {
         $this->companyHelper = $companyHelper;
         $this->ceidgService = $ceidgService;
@@ -43,34 +40,16 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
         $this->customerRepository = $customerRepository;
         $this->addressFactory = $addressFactory;
         $this->messageManager = $messageManager;
-        $this->request = $request;
     }
 
     public function execute(Observer $observer): void
     {
         $customer = $observer->getEvent()->getCustomer();
-        $customerDataFromRequest = $this->request->getPost('customer');
-        $customerWasModified = false;
 
         try {
-            // Reload the customer to ensure we have a fresh object to save
-            $customerToSave = $this->customerRepository->getById($customer->getId());
-
-            // --- Logic from AdminForceConfirm ---
-            $forceConfirm = $customerDataFromRequest['force_confirm'] ?? false;
-            if ($forceConfirm && $customerToSave->getConfirmation()) {
-                $customerToSave->setConfirmation(null);
-                $customerWasModified = true;
-            }
-
-            // --- Logic from AdminCustomerSaveAfter ---
-            $groupId = (int)$customerToSave->getGroupId();
+            $groupId = (int)$customer->getGroupId();
             if (in_array($groupId, $this->companyHelper->getB2bCustomerGroups())) {
-                $customerWasModified = $this->handleB2bAddressUpdate($customerToSave, $customerDataFromRequest) || $customerWasModified;
-            }
-
-            if ($customerWasModified) {
-                $this->customerRepository->save($customerToSave);
+                $this->handleB2bAddressUpdate($customer);
             }
         } catch (Exception $e) {
             $this->messageManager->addErrorMessage(__('An error occurred in a post-save operation: %1', $e->getMessage()));
@@ -81,12 +60,12 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
      * @throws CeidgApiException
      * @throws LocalizedException
      */
-    private function handleB2bAddressUpdate(CustomerInterface $customer, array $customerDataFromRequest): bool
+    private function handleB2bAddressUpdate(CustomerInterface $customer): void
     {
         $taxvat = $customer->getTaxvat();
         if (!$taxvat) {
             $this->messageManager->addWarningMessage(__('NIP was not provided. B2B addresses were not updated.'));
-            return false;
+            return;
         }
 
         $ceidgData = $this->ceidgService->getDataByNip($taxvat);
@@ -116,13 +95,13 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
             $shippingAddressCreated = true;
         }
 
+        $this->customerRepository->save($customer);
+
         $message = __('Customer\'s billing address has been updated based on CEIDG data.');
         if ($shippingAddressCreated) {
             $message .= ' ' . __('A new default shipping address was also created.');
         }
         $this->messageManager->addSuccessMessage($message);
-
-        return true; // Indicates the customer object was modified
     }
 
     private function getOrCreateAddress(int $customerId, ?string $addressId): AddressInterface

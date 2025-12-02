@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace GardenLawn\Company\Helper;
 
+use Magento\Customer\Model\Session;
 use Magento\Framework\App\Helper\AbstractHelper;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\Encryption\EncryptorInterface;
-use Magento\Store\Model\ScopeInterface;
-use Magento\Customer\Model\Session;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
+use Magento\Store\Model\ScopeInterface;
 
 class Data extends AbstractHelper implements ArgumentInterface
 {
@@ -107,12 +108,17 @@ class Data extends AbstractHelper implements ArgumentInterface
     }
 
     /**
-     * Get Current Customer Group Id
+     * Get Current Customer GroupId
      *
      * @return int|null
      */
     public function getCurrentCustomerGroupId(): ?int
     {
-        return (int)$this->customerSession->getCustomerGroupId();
+        try {
+            return $this->customerSession->getCustomerGroupId();
+        } catch (LocalizedException $e) {
+            $this->_logger->error($e->getMessage());
+            return null;
+        }
     }
 }

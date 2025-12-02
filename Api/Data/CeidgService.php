@@ -5,26 +5,33 @@ namespace GardenLawn\Company\Api\Data;
 
 use GardenLawn\Company\Api\Data\Exception\CeidgApiException;
 use GardenLawn\Company\Helper\Data as HelperData;
+use Magento\Framework\App\CacheInterface;
 use Magento\Framework\HTTP\Client\Curl;
 use Psr\Log\LoggerInterface;
 
 class CeidgService
 {
+    private const string CACHE_KEY_PREFIX = 'ceidg_api_';
+    private const int CACHE_LIFETIME = 86400; // 24 hours
+
     protected HelperData $helperData;
     protected Curl $curlClient;
     protected LoggerInterface $logger;
+    private CacheInterface $cache;
 
     private array $lastResponseHeaders = [];
 
     public function __construct(
         HelperData      $helperData,
         Curl            $curlClient,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        CacheInterface  $cache
     )
     {
         $this->helperData = $helperData;
         $this->curlClient = $curlClient;
         $this->logger = $logger;
+        $this->cache = $cache;
     }
 
     /**
@@ -89,6 +96,13 @@ class CeidgService
      */
     private function makeRequest(string $url): ?object
     {
+        $cacheKey = self::CACHE_KEY_PREFIX . md5($url);
+        $cachedResponse = $this->cache->load($cacheKey);
+
+        if ($cachedResponse) {
+            return json_decode($cachedResponse);
+        }
+
         $token = $this->helperData->getCeidgApiToken();
         if (!$token) {
             $this->logger->error('CEIDG API Token is not configured.');
@@ -125,6 +139,13 @@ class CeidgService
             $this->logger->error($errorMessage);
             throw new CeidgApiException(__($errorMessage));
         }
+
+        $this->cache->save(
+            json_encode($decodedResponse),
+            $cacheKey,
+            [],
+            self::CACHE_LIFETIME
+        );
 
         return $decodedResponse;
     }
