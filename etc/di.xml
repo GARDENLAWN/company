@@ -40,4 +40,25 @@
                 type="GardenLawn\Company\Plugin\Controller\Address\FormPostPlugin"
                 sortOrder="10" />
     </type>
+    <type name="Magento\Customer\Controller\Address\FormPost">
+        <plugin name="gardenlawn_company_address_validation"
+                type="GardenLawn\Company\Plugin\Controller\Address\FormPostPlugin"
+                sortOrder="10" />
+    </type>
+    <virtualType name="Magento\Customer\Ui\Component\Form\Address" type="Magento\Ui\Component\Form\Fieldset">
+        <arguments>
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="label" xsi:type="string" translate="true">Addresses</item>
+                    <item name="collapsible" xsi:type="boolean">true</item>
+                    <item name="sortOrder" xsi:type="number">100</item>
+                </item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <type name="Magento\Customer\Model\Customer\DataProviderWithDefaultAddresses">
+        <arguments>
+            <argument name="modifier" xsi:type="object">GardenLawn\Company\Model\Customer\DataProvider\Modifier</argument>
+        </arguments>
+    </type>
 </config>
