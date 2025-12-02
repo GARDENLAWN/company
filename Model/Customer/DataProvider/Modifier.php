@@ -58,6 +58,29 @@ class Modifier implements ModifierInterface
                     ],
                 ];
             }
+
+            if ($customer->getConfirmation()) {
+                $meta['account']['children']['force_confirm'] = [
+                    'arguments' => [
+                        'data' => [
+                            'config' => [
+                                'label' => __('Force Email Confirmation'),
+                                'componentType' => 'field',
+                                'formElement' => 'checkbox',
+                                'dataType' => 'boolean',
+                                'prefer' => 'toggle',
+                                'valueMap' => [
+                                    'true' => '1',
+                                    'false' => '0'
+                                ],
+                                'default' => '0',
+                                'sortOrder' => 25, // After "Send Welcome Email"
+                            ],
+                        ],
+                    ],
+                ];
+            }
+
         } catch (Exception) {
             // Customer not found or other error, do nothing to the meta
         }

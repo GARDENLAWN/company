@@ -4,4 +4,8 @@
         <observer name="gardenlawn_company_b2b_address_create"
                   instance="GardenLawn\Company\Observer\AdminCustomerSaveAfter" />
     </event>
+    <event name="adminhtml_customer_save_after">
+        <observer name="gardenlawn_company_force_confirm"
+                  instance="GardenLawn\Company\Observer\AdminForceConfirm" />
+    </event>
 </config>
