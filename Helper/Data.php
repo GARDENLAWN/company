@@ -110,15 +110,15 @@ class Data extends AbstractHelper implements ArgumentInterface
     /**
      * Get Current Customer GroupId
      *
-     * @return int|null
+     * @return int
      */
-    public function getCurrentCustomerGroupId(): ?int
+    public function getCurrentCustomerGroupId(): int
     {
         try {
-            return $this->customerSession->getCustomerGroupId();
+            return (int)$this->customerSession->getCustomerGroupId();
         } catch (LocalizedException $e) {
             $this->_logger->error($e->getMessage());
-            return null;
+            return 0;
         }
     }
 }
