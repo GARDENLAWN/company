@@ -6,31 +6,33 @@ namespace GardenLawn\Company\Controller\Adminhtml\Index;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\App\ResponseInterface;
+use Magento\Framework\Controller\Result\Redirect;
+use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\LocalizedException;
 
 class Confirm extends Action
 {
     private CustomerRepositoryInterface $customerRepository;
-    private JsonFactory $resultJsonFactory;
+    protected $resultRedirectFactory;
 
     public function __construct(
         Context $context,
-        CustomerRepositoryInterface $customerRepository,
-        JsonFactory $resultJsonFactory
+        CustomerRepositoryInterface $customerRepository
     ) {
         parent::__construct($context);
         $this->customerRepository = $customerRepository;
-        $this->resultJsonFactory = $resultJsonFactory;
+        $this->resultRedirectFactory = $context->getResultRedirectFactory();
     }
 
-    public function execute()
+    public function execute(): ResultInterface|ResponseInterface|Redirect
     {
-        $result = $this->resultJsonFactory->create();
+        $resultRedirect = $this->resultRedirectFactory->create();
         $customerId = $this->getRequest()->getParam('id');
 
         if (!$customerId) {
-            return $result->setData(['success' => false, 'message' => __('Customer ID is missing.')]);
+            $this->messageManager->addErrorMessage(__('Customer ID is missing.'));
+            return $resultRedirect->setPath('customer/index/index');
         }
 
         try {
@@ -39,15 +41,16 @@ class Confirm extends Action
                 $customer->setConfirmation(null);
                 $this->customerRepository->save($customer);
                 $this->messageManager->addSuccessMessage(__('The customer account has been confirmed.'));
-                return $result->setData(['success' => true]);
             } else {
-                return $result->setData(['success' => false, 'message' => __('The customer account is already confirmed.')]);
+                $this->messageManager->addWarningMessage(__('The customer account is already confirmed.'));
             }
         } catch (LocalizedException $e) {
-            return $result->setData(['success' => false, 'message' => $e->getMessage()]);
+            $this->messageManager->addErrorMessage($e->getMessage());
         } catch (\Exception $e) {
-            return $result->setData(['success' => false, 'message' => __('An error occurred while confirming the account.')]);
+            $this->messageManager->addErrorMessage(__('An error occurred while confirming the account.'));
         }
+
+        return $resultRedirect->setPath('customer/index/edit', ['id' => $customerId]);
     }
 
     protected function _isAllowed(): bool
