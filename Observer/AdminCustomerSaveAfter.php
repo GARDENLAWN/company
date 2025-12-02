@@ -1,20 +1,22 @@
 <?php
 declare(strict_types=1);
 
-namespace GardenLawn\Company\Plugin\Controller\Adminhtml\Index;
+namespace GardenLawn\Company\Observer;
 
+use Exception;
+use Magento\Customer\Api\Data\CustomerInterface;
+use Magento\Framework\Event\Observer;
+use Magento\Framework\Event\ObserverInterface;
 use Magento\Customer\Api\AddressRepositoryInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
 use Magento\Customer\Api\Data\AddressInterface;
 use Magento\Customer\Api\Data\AddressInterfaceFactory;
-use Magento\Customer\Controller\Adminhtml\Index\Save;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface;
 use GardenLawn\Company\Api\Data\CeidgService;
 use GardenLawn\Company\Helper\Data as CompanyHelper;
 
-class SavePlugin
+class AdminCustomerSaveAfter implements ObserverInterface
 {
     private CompanyHelper $companyHelper;
     private CeidgService $ceidgService;
@@ -22,7 +24,6 @@ class SavePlugin
     private CustomerRepositoryInterface $customerRepository;
     private AddressInterfaceFactory $addressFactory;
     private ManagerInterface $messageManager;
-    private RequestInterface $request;
 
     public function __construct(
         CompanyHelper $companyHelper,
@@ -30,8 +31,7 @@ class SavePlugin
         AddressRepositoryInterface $addressRepository,
         CustomerRepositoryInterface $customerRepository,
         AddressInterfaceFactory $addressFactory,
-        ManagerInterface $messageManager,
-        RequestInterface $request
+        ManagerInterface $messageManager
     ) {
         $this->companyHelper = $companyHelper;
         $this->ceidgService = $ceidgService;
@@ -39,29 +39,19 @@ class SavePlugin
         $this->customerRepository = $customerRepository;
         $this->addressFactory = $addressFactory;
         $this->messageManager = $messageManager;
-        $this->request = $request;
     }
 
-    public function afterExecute(Save $subject, $result)
+    public function execute(Observer $observer): void
     {
-        $customerId = (int)$this->request->getParam('customer_id');
-        if (!$customerId) {
-            // It's a new customer, get ID from result
-            // This part is tricky as the ID is not easily available from the result.
-            // A more robust way would be to observe the customer_save_after event.
-            // For this plugin, we'll focus on existing customers for simplicity.
-            return $result;
-        }
-
-        $customerData = $this->request->getPost('customer');
-        $groupId = (int)$customerData['group_id'];
+        $customerDataObject = $observer->getEvent()->getCustomerDataObject();
+        $groupId = (int)$customerDataObject->getGroupId();
 
         if (in_array($groupId, $this->companyHelper->getB2bCustomerGroups())) {
-            $taxvat = $customerData['taxvat'] ?? null;
+            $taxvat = $customerDataObject->getTaxvat();
 
             if (!$taxvat) {
                 $this->messageManager->addWarningMessage(__('NIP was not provided. B2B addresses were not updated.'));
-                return $result;
+                return;
             }
 
             try {
@@ -70,14 +60,14 @@ class SavePlugin
                     throw new LocalizedException(__('Could not find company data for the provided NIP.'));
                 }
 
-                $customer = $this->customerRepository->getById($customerId);
+                $customer = $this->customerRepository->getById($customerDataObject->getId());
                 $billingAddressId = $customer->getDefaultBilling();
                 $shippingAddressId = $customer->getDefaultShipping();
                 $shippingAddressCreated = false;
 
                 // Always create/update the default billing address
-                $billingAddress = $this->getOrCreateAddress($customerId, $billingAddressId);
-                $this->updateAddressFromCeidg($billingAddress, $ceidgData, $customerData);
+                $billingAddress = $this->getOrCreateAddress($customer->getId(), $billingAddressId);
+                $this->updateAddressFromCeidg($billingAddress, $ceidgData, $customerDataObject);
                 $billingAddress->setIsDefaultBilling(true);
                 $savedBillingAddress = $this->addressRepository->save($billingAddress);
                 $customer->setDefaultBilling($savedBillingAddress->getId());
@@ -85,8 +75,8 @@ class SavePlugin
                 // Create a default shipping address ONLY if one doesn't exist
                 if (!$shippingAddressId) {
                     $shippingAddress = $this->addressFactory->create();
-                    $shippingAddress->setCustomerId($customerId);
-                    $this->updateAddressFromCeidg($shippingAddress, $ceidgData, $customerData);
+                    $shippingAddress->setCustomerId($customer->getId());
+                    $this->updateAddressFromCeidg($shippingAddress, $ceidgData, $customerDataObject);
                     $shippingAddress->setIsDefaultShipping(true);
                     $savedShippingAddress = $this->addressRepository->save($shippingAddress);
                     $customer->setDefaultShipping($savedShippingAddress->getId());
@@ -101,12 +91,10 @@ class SavePlugin
                 }
                 $this->messageManager->addSuccessMessage($message);
 
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 $this->messageManager->addErrorMessage(__('An error occurred while updating B2B addresses: %1', $e->getMessage()));
             }
         }
-
-        return $result;
     }
 
     private function getOrCreateAddress(int $customerId, ?string $addressId): AddressInterface
@@ -114,7 +102,7 @@ class SavePlugin
         if ($addressId) {
             try {
                 return $this->addressRepository->getById($addressId);
-            } catch (\Exception $e) {
+            } catch (Exception) {
                 // Not found, create new
             }
         }
@@ -123,16 +111,16 @@ class SavePlugin
         return $newAddress;
     }
 
-    private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData, array $customerData): void
+    private function updateAddressFromCeidg(AddressInterface $address, object $ceidgData, CustomerInterface $customerData): void
     {
-        $address->setFirstname($customerData['firstname'])
-            ->setLastname($customerData['lastname'])
+        $address->setFirstname($customerData->getFirstname())
+            ->setLastname($customerData->getLastname())
             ->setCompany($ceidgData->name)
-            ->setVatId($customerData['taxvat'])
+            ->setVatId($customerData->getTaxvat())
             ->setCountryId('PL')
             ->setPostcode($ceidgData->postcode)
             ->setCity($ceidgData->city)
-            ->setStreet([$ceidgData->street]) // Pass street as an array with one element
+            ->setStreet([$ceidgData->street])
             ->setTelephone('000000000'); // Telephone is required
     }
 }
