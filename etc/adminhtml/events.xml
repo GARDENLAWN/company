@@ -1,11 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
-    <event name="customer_save_after_data_object">
-        <observer name="gardenlawn_company_b2b_address_create"
-                  instance="GardenLawn\Company\Observer\AdminCustomerSaveAfter" />
-    </event>
-    <event name="adminhtml_customer_save_after">
-        <observer name="gardenlawn_company_force_confirm"
-                  instance="GardenLawn\Company\Observer\AdminForceConfirm" />
+    <event name="customer_save_commit_after">
+        <observer name="gardenlawn_company_customer_save_commit_after"
+                  instance="GardenLawn\Company\Observer\AdminCustomerSaveCommitAfter" />
     </event>
 </config>
