@@ -2,12 +2,6 @@
 <listing xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="urn:magento:framework:Ui/etc/ui_configuration.xsd">
     <argument name="data" xsi:type="array">
-        <item name="config" xsi:type="array">
-            <item name="update_url" xsi:type="url" path="mui/index/render"/>
-            <item name="filter_url_params" xsi:type="array">
-                <item name="status" xsi:type="string">*</item>
-            </item>
-        </item>
         <item name="js_config" xsi:type="array">
             <item name="provider" xsi:type="string">company_record_grid_list.company_record_grid_list_data_source</item>
             <item name="deps" xsi:type="string">company_record_grid_list.company_record_grid_list_data_source</item>
@@ -24,9 +18,7 @@
     </argument>
     <dataSource name="company_record_grid_list_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
-            <argument name="class" xsi:type="string">
-                GardenLawn\Company\Model\ResourceModel\Company\Grid\DataProvider
-            </argument>
+            <argument name="class" xsi:type="string">Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider</argument>
             <argument name="name" xsi:type="string">company_record_grid_list_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">company_id</argument>
             <argument name="requestFieldName" xsi:type="string">id</argument>
@@ -40,25 +32,11 @@
                 </item>
             </argument>
         </argument>
-        <argument name="data" xsi:type="array">
-            <item name="js_config" xsi:type="array">
-                <item name="component" xsi:type="string">Magento_Ui/js/grid/provider</item>
-            </item>
-        </argument>
     </dataSource>
     <listingToolbar name="listing_top">
-        <filters component="GardenLawn_Company/js/grid/columns/filters"  />
-    </listingToolbar>
-    <container name="listing_top">
-        <argument name="data" xsi:type="array">
-            <item name="config" xsi:type="array">
-                <item name="template" xsi:type="string">ui/grid/toolbar</item>
-                <item name="stickyTmpl" xsi:type="string">ui/grid/sticky/toolbar</item>
-            </item>
-        </argument>
-        <filters name="listing_filters"/>
         <bookmark name="bookmarks"/>
         <columnsControls name="columns_controls"/>
+        <filters name="listing_filters"/>
         <massaction name="listing_massaction">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
@@ -86,31 +64,13 @@
                 </argument>
             </action>
         </massaction>
-        <paging name="listing_paging">
-            <argument name="data" xsi:type="array">
-                <item name="config" xsi:type="array">
-                    <item name="storageConfig" xsi:type="array">
-                        <item name="provider" xsi:type="string">
-                            company_record_grid_list.company_record_grid_list.listing_top.bookmarks
-                        </item>
-                        <item name="namespace" xsi:type="string">current.paging</item>
-                    </item>
-                    <item name="selectProvider" xsi:type="string">
-                        company_record_grid_list.company_record_grid_list.grid_records_columns.ids
-                    </item>
-                </item>
-            </argument>
-        </paging>
-    </container>
+        <paging name="listing_paging"/>
+    </listingToolbar>
     <columns name="grid_records_columns">
-        <settings>
-        </settings>
         <selectionsColumn name="ids">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="indexField" xsi:type="string">company_id</item>
-                    <item name="sorting" xsi:type="string">desc</item>
-                    <item name="sortOrder" xsi:type="number">0</item>
                 </item>
             </argument>
         </selectionsColumn>
@@ -121,14 +81,14 @@
                 <label translate="true">Company ID</label>
             </settings>
         </column>
-        <column name="created_at">
+        <column name="created_at" component="Magento_Ui/js/grid/columns/date">
             <settings>
                 <filter>dateRange</filter>
                 <dataType>date</dataType>
                 <label translate="true">Created at</label>
             </settings>
         </column>
-        <column name="updated_at">
+        <column name="updated_at" component="Magento_Ui/js/grid/columns/date">
             <settings>
                 <filter>dateRange</filter>
                 <dataType>date</dataType>
@@ -149,60 +109,11 @@
                 <label translate="true">Name</label>
             </settings>
         </column>
-        <column name="ceidg_email">
-            <settings>
-                <filter>text</filter>
-                <dataType>text</dataType>
-                <label translate="true">CEIDG Email</label>
-            </settings>
-        </column>
-        <column name="ceidg_phone">
-            <settings>
-                <filter>text</filter>
-                <dataType>text</dataType>
-                <label translate="true">CEIDG Phone</label>
-            </settings>
-        </column>
         <column name="email">
             <settings>
                 <filter>text</filter>
                 <dataType>text</dataType>
                 <label translate="true">Email</label>
-            </settings>
-        </column>
-        <column name="phone">
-            <settings>
-                <filter>text</filter>
-                <dataType>text</dataType>
-                <label translate="true">Phone</label>
-            </settings>
-        </column>
-        <column name="www">
-            <settings>
-                <filter>text</filter>
-                <dataType>text</dataType>
-                <label translate="true">Www</label>
-            </settings>
-        </column>
-        <column name="url">
-            <settings>
-                <filter>text</filter>
-                <dataType>text</dataType>
-                <label translate="true">Url</label>
-            </settings>
-        </column>
-        <column name="address">
-            <settings>
-                <filter>text</filter>
-                <dataType>text</dataType>
-                <label translate="true">Address</label>
-            </settings>
-        </column>
-        <column name="distance">
-            <settings>
-                <filter>float</filter>
-                <dataType>text</dataType>
-                <label translate="true">Distance</label>
             </settings>
         </column>
         <column name="status">
@@ -212,25 +123,9 @@
                 <label translate="true">Status</label>
             </settings>
         </column>
-        <column name="customer_group_id">
-            <settings>
-                <filter>select</filter>
-                <dataType>select</dataType>
-                <label translate="true">Group</label>
-            </settings>
-        </column>
-        <column name="customer_id">
-            <settings>
-                <filter>select</filter>
-                <dataType>select</dataType>
-                <label translate="true">Customer</label>
-            </settings>
-        </column>
         <actionsColumn name="actions" class="GardenLawn\Company\Ui\Component\Listing\Grid\Column\Action">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="resizeEnabled" xsi:type="boolean">false</item>
-                    <item name="resizeDefaultWidth" xsi:type="string">107</item>
                     <item name="indexField" xsi:type="string">company_id</item>
                 </item>
             </argument>
