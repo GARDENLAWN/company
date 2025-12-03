@@ -42,6 +42,6 @@ class CompanyComment extends AbstractDb
      */
     protected function _construct(): void
     {
-        $this->_init('company_comment', 'comment_id');
+        $this->_init('gardenlawn_company_comment', 'comment_id');
     }
 }
