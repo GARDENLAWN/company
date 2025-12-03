@@ -3,6 +3,16 @@
     <acl>
         <resources>
             <resource id="Magento_Backend::admin">
+                <resource id="Magento_Customer::customer">
+                    <resource id="GardenLawn_Company::manager" title="Company" sortOrder="50">
+                        <resource id="GardenLawn_Company::grid_list" title="All Companies" sortOrder="10" />
+                        <resource id="GardenLawn_Company::add_row" title="Add Row" sortOrder="20" />
+                        <resource id="GardenLawn_Company::save" title="Save Company" sortOrder="30" />
+                        <resource id="GardenLawn_Company::row_data_delete" title="Delete Company" sortOrder="40" />
+                        <resource id="GardenLawn_Company::send_email" title="Send Email" sortOrder="50" />
+                        <resource id="GardenLawn_Company::create_customer" title="Create Customer" sortOrder="60" />
+                    </resource>
+                </resource>
                 <resource id="Magento_Backend::stores">
                     <resource id="Magento_Backend::stores_settings">
                         <resource id="Magento_Config::config">
