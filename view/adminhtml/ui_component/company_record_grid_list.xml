@@ -45,7 +45,7 @@
         <massaction name="listing_massaction">
             <action name="delete">
                 <settings>
-                    <url path="gardenlawn_company/grid/massDelete"/>
+                    <url path="company/grid/massDelete"/>
                     <type>delete</type>
                     <label translate="true">Delete</label>
                     <confirm>

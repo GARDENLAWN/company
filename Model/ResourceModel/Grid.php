@@ -42,6 +42,6 @@ class Grid extends AbstractDb
      */
     protected function _construct(): void
     {
-        $this->_init('gardenlawn_company', 'company_id');
+        $this->_init('company', 'company_id');
     }
 }

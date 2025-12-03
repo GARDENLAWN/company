@@ -10,7 +10,7 @@ class Company extends AbstractModel
     /**
      * Cache tag
      */
-    public const CACHE_TAG = 'gardenlawn_company';
+    public const CACHE_TAG = 'company';
 
     /**
      * Initialize resource model

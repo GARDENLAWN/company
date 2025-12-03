@@ -11,19 +11,19 @@ class Grid extends AbstractModel implements GridInterface
     /**
      * CMS page cache tag.
      */
-    const string CACHE_TAG = 'gardenlawn_company';
+    const string CACHE_TAG = 'company';
 
     /**
      * @var string
      */
-    protected $_cacheTag = 'gardenlawn_company';
+    protected $_cacheTag = 'company';
 
     /**
      * Prefix of model events names.
      *
      * @var string
      */
-    protected $_eventPrefix = 'gardenlawn_company';
+    protected $_eventPrefix = 'company';
 
     /**
      * Initialize resource model.

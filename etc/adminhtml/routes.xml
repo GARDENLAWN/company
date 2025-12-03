@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:App/etc/routes.xsd">
     <router id="admin">
-        <route id="gardenlawn_company" frontName="gardenlawn_company">
+        <route id="company" frontName="company">
             <module name="GardenLawn_Company" before="Magento_Backend" />
         </route>
     </router>

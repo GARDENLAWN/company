@@ -39,7 +39,7 @@ class Save extends Action
     {
         $data = $this->getRequest()->getPostValue();
         if (!$data) {
-            $this->_redirect('gardenlawn_company/grid/addrow');
+            $this->_redirect('company/grid/addrow');
             return;
         }
         try {
@@ -95,7 +95,7 @@ class Save extends Action
         } catch (Exception $e) {
             $this->messageManager->addError(__($e->getMessage()));
         }
-        $this->_redirect(isset($data['id']) ? 'gardenlawn_company/grid/addrow/id/' . $data['id'] : 'gardenlawn_company/grid/index');
+        $this->_redirect(isset($data['id']) ? 'company/grid/addrow/id/' . $data['id'] : 'company/grid/index');
     }
 
     /**

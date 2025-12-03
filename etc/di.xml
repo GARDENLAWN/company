@@ -6,7 +6,7 @@
     <virtualType name="GardenLawn\Company\Model\ResourceModel\CompanyComment\CompanyComment\Collection"
                  type="Magento\Framework\View\Element\UiComponent\DataProvider\SearchResult">
         <arguments>
-            <argument name="mainTable" xsi:type="string">gardenlawn_company_comment</argument>
+            <argument name="mainTable" xsi:type="string">company_comment</argument>
             <argument name="resourceModel" xsi:type="string">GardenLawn\Company\Model\ResourceModel\CompanyComment</argument>
         </arguments>
     </virtualType>

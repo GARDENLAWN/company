@@ -33,7 +33,7 @@
                     table="gardenlawn_company" column="customer_group_id" referenceTable="customer_group"
                     referenceColumn="customer_group_id" onDelete="SET NULL"/>
     </table>
-    <table name="gardenlawn_company_comment" resource="default" engine="innodb" comment="Comments to company">
+    <table name="company_comment" resource="default" engine="innodb" comment="Comments to company">
         <column xsi:type="int" name="comment_id" unsigned="true" nullable="false" identity="true"
                 comment="Company ID"/>
         <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
@@ -47,7 +47,7 @@
             <column name="comment_id"/>
         </constraint>
         <constraint xsi:type="foreign" referenceId="COMPANY_COMMENT_ID"
-                    table="gardenlawn_company_comment" column="company_id" referenceTable="gardenlawn_company"
+                    table="company_comment" column="company_id" referenceTable="gardenlawn_company"
                     referenceColumn="company_id" onDelete="CASCADE"/>
     </table>
 </schema>

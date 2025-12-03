@@ -8,6 +8,7 @@ use Magento\Backend\App\Action\Context;
 use Magento\Backend\Model\View\Result\Page;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Registry;
 
 class AddRow extends Action
@@ -41,6 +42,7 @@ class AddRow extends Action
     /**
      * Mapped Grid List page.
      * @return Page|ResultInterface
+     * @throws LocalizedException
      */
     public function execute(): Page|ResultInterface
     {
@@ -52,7 +54,7 @@ class AddRow extends Action
             $rowTitle = $rowData->getTitle();
             if (!$rowData->getCompanyId()) {
                 $this->messageManager->addError(__('row data no longer exist.'));
-                $this->_redirect('gardenlawn_company/grid/rowdata');
+                $this->_redirect('company/grid/rowdata');
             }
         }
 
