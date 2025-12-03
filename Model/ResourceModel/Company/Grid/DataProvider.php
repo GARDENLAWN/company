@@ -3,16 +3,16 @@ declare(strict_types=1);
 
 namespace GardenLawn\Company\Model\ResourceModel\Company\Grid;
 
-use Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider as UiDataProvider;
-use GardenLawn\Company\Model\ResourceModel\Company\CollectionFactory;
+use Magento\Ui\DataProvider\AbstractDataProvider;
+use Magento\Framework\Data\Collection;
 
-class DataProvider extends UiDataProvider
+class DataProvider extends AbstractDataProvider
 {
     /**
      * @param string $name
      * @param string $primaryFieldName
      * @param string $requestFieldName
-     * @param CollectionFactory $collectionFactory
+     * @param Collection $collection
      * @param array $meta
      * @param array $data
      */
@@ -20,11 +20,11 @@ class DataProvider extends UiDataProvider
         $name,
         $primaryFieldName,
         $requestFieldName,
-        CollectionFactory $collectionFactory,
+        Collection $collection,
         array $meta = [],
         array $data = []
     ) {
-        $this->collection = $collectionFactory->create();
+        $this->collection = $collection;
         parent::__construct($name, $primaryFieldName, $requestFieldName, $meta, $data);
     }
 }
