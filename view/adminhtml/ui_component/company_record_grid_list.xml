@@ -25,7 +25,7 @@
     <dataSource name="company_record_grid_list_data_source">
         <argument name="dataProvider" xsi:type="configurableObject">
             <argument name="class" xsi:type="string">
-                Magento\Framework\View\Element\UiComponent\DataProvider\DataProvider
+                GardenLawn\Company\Model\ResourceModel\Company\Grid\DataProvider
             </argument>
             <argument name="name" xsi:type="string">company_record_grid_list_data_source</argument>
             <argument name="primaryFieldName" xsi:type="string">company_id</argument>
