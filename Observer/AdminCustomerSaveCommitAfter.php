@@ -32,14 +32,15 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
     private RegionFactory $regionFactory;
 
     public function __construct(
-        CompanyHelper $companyHelper,
-        CeidgService $ceidgService,
-        AddressRepositoryInterface $addressRepository,
+        CompanyHelper               $companyHelper,
+        CeidgService                $ceidgService,
+        AddressRepositoryInterface  $addressRepository,
         CustomerRepositoryInterface $customerRepository,
-        AddressInterfaceFactory $addressFactory,
-        ManagerInterface $messageManager,
-        RegionFactory $regionFactory
-    ) {
+        AddressInterfaceFactory     $addressFactory,
+        ManagerInterface            $messageManager,
+        RegionFactory               $regionFactory
+    )
+    {
         $this->companyHelper = $companyHelper;
         $this->ceidgService = $ceidgService;
         $this->addressRepository = $addressRepository;
@@ -143,6 +144,6 @@ class AdminCustomerSaveCommitAfter implements ObserverInterface
             ->setCity($ceidgData->city)
             ->setStreet([$ceidgData->street])
             ->setRegionId($regionId)
-            ->setTelephone('000000000'); // Telephone is required
+            ->setTelephone($address->getTelephone() ?? '000000000');
     }
 }
