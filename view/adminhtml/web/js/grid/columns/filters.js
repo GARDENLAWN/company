@@ -22,7 +22,7 @@ define([
      * @param {Object} elem - Element whose preview should be extracted.
      * @returns {Object} Formatted data.
      */
-    function extractPreview(elem) {alert(12);
+    function extractPreview(elem) {
         return {
             label: elem.label,
             preview: elem.getPreview(),
