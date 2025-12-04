@@ -6,34 +6,29 @@ namespace GardenLawn\Company\Cron;
 use Exception;
 use GardenLawn\Company\Api\Data\CeidgService;
 use GardenLawn\Company\Api\Data\Exception\CeidgApiException;
-
-// Added this use statement
 use GardenLawn\Company\Enum\Status;
 use GardenLawn\Company\Helper\Data as CompanyHelper;
-use GardenLawn\Company\Model\CompanyFactory;
-use GardenLawn\Company\Model\ResourceModel\Company as CompanyResource;
 use GardenLawn\Core\Utils\Logger;
-
-// Assuming this Logger is still desired for general logging
+use Magento\Framework\App\ObjectManager;
+use Magento\Framework\DB\Adapter\AdapterInterface;
 
 class CompanyCeidg
 {
     protected CeidgService $ceidgService;
-    protected CompanyFactory $companyFactory;
-    protected CompanyResource $companyResource;
     protected CompanyHelper $companyHelper;
+    protected AdapterInterface $connection;
+    protected ObjectManager $objectManager;
 
     public function __construct(
         CeidgService    $ceidgService,
-        CompanyFactory  $companyFactory,
-        CompanyResource $companyResource,
         CompanyHelper   $companyHelper
     )
     {
         $this->ceidgService = $ceidgService;
-        $this->companyFactory = $companyFactory;
-        $this->companyResource = $companyResource;
         $this->companyHelper = $companyHelper;
+        $this->objectManager = ObjectManager::getInstance();
+        $resource = $this->objectManager->get('Magento\Framework\App\ResourceConnection');
+        $this->connection = $resource->getConnection();
     }
 
     /**
@@ -67,7 +62,7 @@ class CompanyCeidg
             $url_components = parse_url($last);
             parse_str($url_components['query'], $params);
             $max = (int)($params['page'] ?? 1);
-            $internalCompanyStatus = Status::New->value; // This status is for internal company status, not CEIDG API status
+            $status = Status::New->value; // This status is for internal company status, not CEIDG API status
 
             for ($i = 1; $i <= $max; $i++) {
                 $current = $govlink . $i;
@@ -81,70 +76,28 @@ class CompanyCeidg
                                 $f = $this->ceidgService->getDataByUrl($url);
 
                                 if (property_exists($f, 'firma') && !empty($f->firma) && $f->firma[0]->pkdGlowny == $pkdCode) {
-                                    $companyData = $f->firma[0];
-
-                                    $nip = $companyData->wlasciciel->nip ?? null;
-                                    $name = $companyData->nazwa ?? null;
-
-                                    // Basic validation for NIP and Name
-                                    if (empty($nip) || empty($name)) {
-                                        Logger::writeLog('Skipping company due to missing NIP or Name: ' . json_encode($companyData));
-                                        continue;
-                                    }
-
-                                    $email = property_exists($companyData, 'email') ? $companyData->email : "";
-                                    $phone = property_exists($companyData, 'telefon') ? $companyData->telefon : "";
-                                    $www = property_exists($companyData, 'www') ? $companyData->www : "";
-                                    $link = $companyData->link;
-                                    $a = $companyData->adresDzialalnosci;
+                                    $name = $f->firma[0]->nazwa;
+                                    $email = property_exists($f->firma[0], 'email') ? $f->firma[0]->email : "";
+                                    $phone = property_exists($f->firma[0], 'telefon') ? $f->firma[0]->telefon : "";
+                                    $www = property_exists($f->firma[0], 'www') ? $f->firma[0]->www : "";
+                                    $link = $f->firma[0]->link;
+                                    $nip = $f->firma[0]->wlasciciel->nip;
+                                    $a = $f->firma[0]->adresDzialalnosci;
                                     $address = (property_exists($a, 'ulica') ? $a->ulica . " " : (property_exists($a, 'miasto') ? $a->miasto . " " : "")) .
                                         (property_exists($a, 'budynek') ? $a->budynek : "") .
                                         (property_exists($a, 'lokal') ? "/" . $a->lokal . ", " : ", ") .
                                         (property_exists($a, 'kod') ? $a->kod . " " : "") .
                                         (property_exists($a, 'miasto') ? $a->miasto : "");
-                                    $distance = 0; // This seems to be a default value, consider if it should be dynamic
-
-                                    $company = $this->companyFactory->create();
-                                    $this->companyResource->load($company, $nip, 'nip'); // Load by NIP
-
-                                    $isNewCompany = !$company->getId();
-                                    $originalData = $company->getData();
-
-                                    $company->setNip($nip);
-                                    $company->setName($name);
-                                    $company->setUrl($link);
-                                    $company->setAddress($address);
-                                    $company->setDistance($distance);
-                                    $company->setCeidgEmail($email);
-                                    $company->setCeidgPhone($phone);
-                                    $company->setWww($www);
-
-                                    // Only set initial status for new companies
-                                    if ($isNewCompany) {
-                                        $company->setStatus($internalCompanyStatus);
-                                        // Also set email/phone for new companies from CEIDG data
-                                        $company->setEmail($email);
-                                        $company->setPhone($phone);
-                                    }
-
-                                    $isDataChanged = false;
-                                    if (!$isNewCompany) {
-                                        $newData = $company->getData();
-                                        $fieldsToCheck = ['name', 'url', 'address', 'ceidg_email', 'ceidg_phone', 'www'];
-                                        foreach ($fieldsToCheck as $field) {
-                                            if ($originalData[$field] != $newData[$field]) {
-                                                $isDataChanged = true;
-                                                break;
-                                            }
-                                        }
-                                    }
-
-                                    if ($isNewCompany || $isDataChanged) {
-                                        $this->companyResource->save($company);
-                                        Logger::writeLog('Company ' . $nip . ' ' . ($isNewCompany ? 'created' : 'updated') . '.');
+                                    $distance = 0;//$this->distanceShipping->getDistance("ul. Namysłowska 2, 46-081 Dobrzeń Wielki", $address);
+                                    $sql = "SELECT COUNT(company_id) AS Number FROM gardenlawn_company WHERE nip = '$nip';";
+                                    $count = $this->connection->fetchAll($sql)[0]["Number"];
+                                    if ($count == 0) {
+                                        $sql = "INSERT INTO gardenlawn_company(nip, name, url, address, distance, status, ceidg_email, ceidg_phone, email, phone, www) VALUES ('$nip', '$name', '$link', '$address', $distance, $status, '$email', '$phone', '$email', '$phone', '$www');";
                                     } else {
-                                        Logger::writeLog('Company ' . $nip . ' data unchanged. Skipping save.');
+                                        $sql = "UPDATE gardenlawn_company SET ceidg_email = '$email', ceidg_phone = '$phone', www = '$www', address = '$address', distance = $distance WHERE nip = '$nip' AND (ceidg_email IS NULL OR ceidg_email <> '$email' OR ceidg_phone <> '$phone' OR www <> '$www' OR address <> '$address' OR distance <> $distance);";
                                     }
+                                    Logger::writeLog($sql);
+                                    $this->connection->query($sql);
                                 }
                             } catch (CeidgApiException $e) {
                                 Logger::writeLog('CEIDG API Error for company detail (' . ($url ?? 'N/A') . '): ' . $e->getMessage());

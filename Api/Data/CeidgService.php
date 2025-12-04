@@ -139,8 +139,6 @@ class CeidgService
             self::CACHE_LIFETIME
         );
 
-        Logger::writeLog('Response: ' . $decodedResponse);
-
         return $decodedResponse;
     }
 }
