@@ -18,10 +18,6 @@ use GardenLawn\Core\Utils\Logger;
 
 class CompanyCeidg
 {
-    protected const DEFAULT_API_SLEEP_SECONDS = 5;
-    protected const LONG_API_SLEEP_SECONDS = 5;
-    protected const RATE_LIMIT_THRESHOLD = 5; // If remaining requests fall below this, sleep longer
-
     protected CeidgService $ceidgService;
     protected CompanyFactory $companyFactory;
     protected CompanyResource $companyResource;
@@ -60,7 +56,6 @@ class CompanyCeidg
 
         try {
             $page = $this->ceidgService->getDataByUrl($initialUrl);
-            $this->applyRateLimitSleep(); // Apply sleep after initial request
 
             if (!$page || !property_exists($page, 'links') || !property_exists($page->links, 'first') || !property_exists($page->links, 'last')) {
                 Logger::writeLog('CEIDG API: Initial page or links not found.');
@@ -78,14 +73,12 @@ class CompanyCeidg
                 $current = $govlink . $i;
                 try {
                     $page = $this->ceidgService->getDataByUrl($current);
-                    $this->applyRateLimitSleep(); // Apply sleep after each page request
 
                     if ($page != null && property_exists($page, 'firmy')) {
                         foreach ($page->firmy as $item) {
                             try {
                                 $url = $item->link;
                                 $f = $this->ceidgService->getDataByUrl($url);
-                                $this->applyRateLimitSleep(); // Apply sleep after each company detail request
 
                                 if (property_exists($f, 'firma') && !empty($f->firma) && $f->firma[0]->pkdGlowny == $pkdCode) {
                                     $companyData = $f->firma[0];
@@ -154,38 +147,6 @@ class CompanyCeidg
         } catch (Exception $e) {
             Logger::writeLog('CEIDG Cron Job failed: ' . $e->getMessage());
             throw $e; // Re-throw to allow Magento to mark cron as failed
-        }
-    }
-
-    /**
-     * Applies a sleep based on API rate limit headers.
-     * If rate limit headers are not found or remaining is above threshold, uses default sleep.
-     * If remaining is below threshold, uses a longer sleep.
-     *
-     * @return void
-     */
-    private function applyRateLimitSleep(): void
-    {
-        $headers = $this->ceidgService->getLastResponseHeaders();
-        $remainingRequests = null;
-
-        // Check for common rate limit headers
-        foreach ($headers as $name => $value) {
-            if (strtolower($name) === 'x-ratelimit-remaining' || strtolower($name) === 'ratelimit-remaining') {
-                $remainingRequests = (int)$value;
-                break;
-            }
-        }
-
-        if ($remainingRequests !== null && $remainingRequests < self::RATE_LIMIT_THRESHOLD) {
-            Logger::writeLog(sprintf(
-                'CEIDG API: Rate limit approaching (%d remaining). Sleeping for %d seconds.',
-                $remainingRequests,
-                self::LONG_API_SLEEP_SECONDS
-            ));
-            sleep(self::LONG_API_SLEEP_SECONDS);
-        } else {
-            sleep(self::DEFAULT_API_SLEEP_SECONDS);
         }
     }
 }

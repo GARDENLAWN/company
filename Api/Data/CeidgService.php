@@ -77,17 +77,8 @@ class CeidgService
      */
     public function getDataByUrl(string $url): ?object
     {
+        usleep(3600000);
         return $this->makeRequest($url);
-    }
-
-    /**
-     * Get last response headers.
-     *
-     * @return array
-     */
-    public function getLastResponseHeaders(): array
-    {
-        return $this->lastResponseHeaders;
     }
 
     /**
