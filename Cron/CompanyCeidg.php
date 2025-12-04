@@ -108,6 +108,7 @@ class CompanyCeidg
                                     $this->companyResource->load($company, $nip, 'nip'); // Load by NIP
 
                                     $isNewCompany = !$company->getId();
+                                    $originalData = $company->getData();
 
                                     $company->setNip($nip);
                                     $company->setName($name);
@@ -126,9 +127,24 @@ class CompanyCeidg
                                         $company->setPhone($phone);
                                     }
 
-                                    $this->companyResource->save($company);
-                                    Logger::writeLog('Company ' . $nip . ' ' . ($isNewCompany ? 'created' : 'updated') . '.');
+                                    $isDataChanged = false;
+                                    if (!$isNewCompany) {
+                                        $newData = $company->getData();
+                                        $fieldsToCheck = ['name', 'url', 'address', 'ceidg_email', 'ceidg_phone', 'www'];
+                                        foreach ($fieldsToCheck as $field) {
+                                            if ($originalData[$field] != $newData[$field]) {
+                                                $isDataChanged = true;
+                                                break;
+                                            }
+                                        }
+                                    }
 
+                                    if ($isNewCompany || $isDataChanged) {
+                                        $this->companyResource->save($company);
+                                        Logger::writeLog('Company ' . $nip . ' ' . ($isNewCompany ? 'created' : 'updated') . '.');
+                                    } else {
+                                        Logger::writeLog('Company ' . $nip . ' data unchanged. Skipping save.');
+                                    }
                                 }
                             } catch (CeidgApiException $e) {
                                 Logger::writeLog('CEIDG API Error for company detail (' . ($url ?? 'N/A') . '): ' . $e->getMessage());

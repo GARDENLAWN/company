@@ -19,8 +19,6 @@ class CeidgService
     protected LoggerInterface $logger;
     private CacheInterface $cache;
 
-    private array $lastResponseHeaders = [];
-
     public function __construct(
         HelperData      $helperData,
         Curl            $curlClient,
@@ -108,7 +106,6 @@ class CeidgService
 
         $status = $this->curlClient->getStatus();
         $responseBody = $this->curlClient->getBody();
-        $this->lastResponseHeaders = $this->curlClient->getHeaders();
 
         if ($status !== 200) {
             $errorMessage = sprintf(
