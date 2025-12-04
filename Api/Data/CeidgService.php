@@ -37,16 +37,16 @@ class CeidgService
     /**
      * Get data by NIP from CEIDG API.
      *
-     * @param string $nip
+     * @param string $taxvat
      * @return object|null
      * @throws CeidgApiException
      */
-    public function getDataByNip(string $nip): ?object
+    public function getDataByNip(string $taxvat): ?object
     {
-        if (strlen($nip) === 0) {
+        if (strlen($taxvat) === 0) {
             return null;
         }
-        $url = $this->helperData->getCeidgApiBaseUrl() . "firma?nip=" . $nip;
+        $url = $this->helperData->getCeidgApiBaseUrl() . "firma?nip=" . $taxvat;
         $response = $this->makeRequest($url);
 
         if (isset($response->firma) && count($response->firma) > 0) {

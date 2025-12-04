@@ -34,7 +34,7 @@ class Ceidg extends Action
     {
         $resultJson = $this->resultJsonFactory->create();
 
-        $data = $this->ceidgService->getDataByNip($this->getRequest()->getParam('nip'));
+        $data = $this->ceidgService->getDataByNip($this->getRequest()->getParam('taxvat'));
 
         return $resultJson->setData($data);
     }
