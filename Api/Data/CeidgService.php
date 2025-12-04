@@ -5,6 +5,7 @@ namespace GardenLawn\Company\Api\Data;
 
 use GardenLawn\Company\Api\Data\Exception\CeidgApiException;
 use GardenLawn\Company\Helper\Data as HelperData;
+use GardenLawn\Core\Utils\Logger;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\HTTP\Client\Curl;
 use Psr\Log\LoggerInterface;
@@ -75,7 +76,7 @@ class CeidgService
      */
     public function getDataByUrl(string $url): ?object
     {
-        usleep(3600000);
+        sleep(3);
         return $this->makeRequest($url);
     }
 
@@ -137,6 +138,8 @@ class CeidgService
             [],
             self::CACHE_LIFETIME
         );
+
+        Logger::writeLog('Response: ' . $decodedResponse);
 
         return $decodedResponse;
     }
