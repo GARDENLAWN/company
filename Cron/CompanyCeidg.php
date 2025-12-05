@@ -89,15 +89,62 @@ class CompanyCeidg
                                         (property_exists($a, 'kod') ? $a->kod . " " : "") .
                                         (property_exists($a, 'miasto') ? $a->miasto : "");
                                     $distance = 0;//$this->distanceShipping->getDistance("ul. Namysłowska 2, 46-081 Dobrzeń Wielki", $address);
-                                    $sql = "SELECT COUNT(company_id) AS Number FROM gardenlawn_company WHERE nip = '$nip';";
-                                    $count = $this->connection->fetchAll($sql)[0]["Number"];
-                                    if ($count == 0) {
-                                        $sql = "INSERT INTO gardenlawn_company(nip, name, url, address, distance, status, ceidg_email, ceidg_phone, email, phone, www) VALUES ('$nip', '$name', '$link', '$address', $distance, $status, '$email', '$phone', '$email', '$phone', '$www');";
+                                    $tableName = $this->connection->getTableName('gardenlawn_company');
+
+                                    // Check if company exists and get current data for comparison
+                                    $select = $this->connection->select()
+                                        ->from($tableName, ['ceidg_email', 'ceidg_phone', 'www', 'address', 'distance'])
+                                        ->where('nip = ?', $nip);
+                                    $existingCompany = $this->connection->fetchRow($select);
+
+                                    if (!$existingCompany) {
+                                        // Company does not exist, insert it
+                                        $insertData = [
+                                            'nip' => $nip,
+                                            'name' => $name,
+                                            'url' => $link,
+                                            'address' => $address,
+                                            'distance' => $distance,
+                                            'status' => $status,
+                                            'ceidg_email' => $email,
+                                            'ceidg_phone' => $phone,
+                                            'email' => $email,
+                                            'phone' => $phone,
+                                            'www' => $www
+                                        ];
+                                        $this->connection->insert($tableName, $insertData);
+                                        Logger::writeLog('CEIDG Cron: Inserted new company with NIP: ' . $nip);
                                     } else {
-                                        $sql = "UPDATE gardenlawn_company SET ceidg_email = '$email', ceidg_phone = '$phone', www = '$www', address = '$address', distance = $distance WHERE nip = '$nip' AND (ceidg_email IS NULL OR ceidg_email <> '$email' OR ceidg_phone <> '$phone' OR www <> '$www' OR address <> '$address' OR distance <> $distance);";
+                                        // Company exists, check if an update is needed
+                                        $needsUpdate =
+                                            $existingCompany['name'] !== $name||
+                                            $existingCompany['url'] !==  $link||
+                                            $existingCompany['address'] !==  $address||
+                                            $existingCompany['status'] !==  $status||
+                                            $existingCompany['ceidg_email' ] !==  $email||
+                                            $existingCompany['ceidg_phone' ] !==  $phone||
+                                            $existingCompany['email' ] !==  $email||
+                                            $existingCompany['phone' ] !==  $phone||
+                                            $existingCompany['www' ] !==  $www;
+
+                                        if ($needsUpdate) {
+                                            $updateData = [
+                                                'name' => $name,
+                                                'url' => $link,
+                                                'address' => $address,
+                                                'status' => $status,
+                                                'ceidg_email' => $email,
+                                                'ceidg_phone' => $phone,
+                                                'email' => $email,
+                                                'phone' => $phone,
+                                                'www' => $www,
+                                                'updated_at' => date('Y-m-d H:i:s')
+                                            ];
+                                            $where = ['nip = ?' => $nip];
+                                            $this->connection->update($tableName, $updateData, $where);
+                                            Logger::writeLog('CEIDG Cron: Updated company with NIP: ' . $nip);
+                                        }
                                     }
-                                    Logger::writeLog($sql);
-                                    $this->connection->query($sql);
                                 }
                             } catch (CeidgApiException $e) {
                                 Logger::writeLog('CEIDG API Error for company detail (' . ($url ?? 'N/A') . '): ' . $e->getMessage());
