@@ -20,8 +20,8 @@ class CompanyCeidg
     protected ObjectManager $objectManager;
 
     public function __construct(
-        CeidgService    $ceidgService,
-        CompanyHelper   $companyHelper
+        CeidgService  $ceidgService,
+        CompanyHelper $companyHelper
     )
     {
         $this->ceidgService = $ceidgService;
@@ -92,7 +92,16 @@ class CompanyCeidg
 
                                     // Check if company exists and get current data for comparison
                                     $select = $this->connection->select()
-                                        ->from($tableName, ['ceidg_email', 'ceidg_phone', 'www', 'address', 'distance'])
+                                        ->from($tableName, [
+                                            'nip',
+                                            'name',
+                                            'url',
+                                            'address',
+                                            'distance',
+                                            'ceidg_email',
+                                            'ceidg_phone',
+                                            'www'
+                                        ])
                                         ->where('nip = ?', $nip);
                                     $existingCompany = $this->connection->fetchRow($select);
 
@@ -116,26 +125,20 @@ class CompanyCeidg
                                     } else {
                                         // Company exists, check if an update is needed
                                         $needsUpdate =
-                                            $existingCompany['name'] !== $name||
-                                            $existingCompany['url'] !==  $link||
-                                            $existingCompany['address'] !==  $address||
-                                            $existingCompany['status'] !==  $status||
-                                            $existingCompany['ceidg_email' ] !==  $email||
-                                            $existingCompany['ceidg_phone' ] !==  $phone||
-                                            $existingCompany['email' ] !==  $email||
-                                            $existingCompany['phone' ] !==  $phone||
-                                            $existingCompany['www' ] !==  $www;
+                                            $existingCompany['name'] !== $name ||
+                                            $existingCompany['url'] !== $link ||
+                                            $existingCompany['address'] !== $address ||
+                                            $existingCompany['ceidg_email'] !== $email ||
+                                            $existingCompany['ceidg_phone'] !== $phone ||
+                                            $existingCompany['www'] !== $www;
 
                                         if ($needsUpdate) {
                                             $updateData = [
                                                 'name' => $name,
                                                 'url' => $link,
                                                 'address' => $address,
-                                                'status' => $status,
                                                 'ceidg_email' => $email,
                                                 'ceidg_phone' => $phone,
-                                                'email' => $email,
-                                                'phone' => $phone,
                                                 'www' => $www,
                                                 'updated_at' => date('Y-m-d H:i:s')
                                             ];
