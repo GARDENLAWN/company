@@ -74,8 +74,7 @@ class CompanyCeidg
                             try {
                                 $url = $item->link;
                                 $f = $this->ceidgService->getDataByUrl($url);
-
-                                if (property_exists($f, 'firma') && !empty($f->firma) && $f->firma[0]->pkdGlowny == $pkdCode) {
+                                if (property_exists($f, 'firma') && !empty($f->firma) && $f->firma[0]->pkdGlowny->kod == $pkdCode) {
                                     $name = $f->firma[0]->nazwa;
                                     $email = property_exists($f->firma[0], 'email') ? $f->firma[0]->email : "";
                                     $phone = property_exists($f->firma[0], 'telefon') ? $f->firma[0]->telefon : "";
