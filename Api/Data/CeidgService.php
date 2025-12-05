@@ -76,7 +76,7 @@ class CeidgService
      */
     public function getDataByUrl(string $url): ?object
     {
-        sleep(3);
+        sleep(4);
         return $this->makeRequest($url);
     }
 
