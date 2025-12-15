@@ -3,7 +3,7 @@
 namespace GardenLawn\Company\Ui\Component\Listing\Grid\Column;
 
 use GardenLawn\Company\Model\CustomerGroups;
-use GardenLawn\Company\Model\Status;
+use GardenLawn\Company\Model\Config\Source\Status;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;

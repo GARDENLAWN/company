@@ -3,7 +3,7 @@
 namespace GardenLawn\Company\Controller\Adminhtml\Grid;
 
 use Exception;
-use GardenLawn\Company\Enum\Status;
+use GardenLawn\Company\Model\Config\Source\Status;
 use GardenLawn\Company\Model\CompanyCommentFactory;
 use GardenLawn\Company\Model\GridFactory;
 use Magento\Backend\App\Action;
@@ -82,7 +82,7 @@ class CreateCustomer extends Action
                 $current = $this->gridFactory->create()->load($rowData->getCompanyId());
 
                 $rowData->setCustomerId($newCustomer->getId());
-                $rowData->setStatus(Status::CustomerCreate->value);
+                $rowData->setStatus(Status::StatusCreateCustomer);
                 $rowData->save();
 
                 $customer = $this->customerRepository->getById($newCustomer->getId());
@@ -90,8 +90,8 @@ class CreateCustomer extends Action
                 $this->accountManagement->changeResetPasswordLinkToken($customer, $newLinkToken);
 
                 if ($current->getStatus() != $rowData->getStatus()) {
-                    $from = \GardenLawn\Company\Model\Status::getStatusName($current->getStatus());
-                    $to = \GardenLawn\Company\Model\Status::getStatusName($rowData->getStatus());
+                    $from = Status::getStatusName($current->getStatus());
+                    $to = Status::getStatusName($rowData->getStatus());
                     $message = "Status changed from '$from' to '$to'";
                     $comment = $this->commentFactory->create();
                     $comment->setCompanyId($rowData->getCompanyId());

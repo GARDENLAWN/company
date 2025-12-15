@@ -1,11 +1,13 @@
 <?php
 
-namespace GardenLawn\Company\Model;
+namespace GardenLawn\Company\Model\Config\Source;
 
 use Magento\Framework\Data\OptionSourceInterface;
 
 class Status implements OptionSourceInterface
 {
+    public const int StatusCreateCustomer = 4;
+
     /**
      * Get Grid row status labels array with empty value for option element.
      *
@@ -13,7 +15,7 @@ class Status implements OptionSourceInterface
      */
     public function getAllOptions(): array
     {
-        $res = $this->getOptions();
+        $res = $this->toOptionArray();
         array_unshift($res, ['value' => '', 'label' => '']);
         return $res;
     }
@@ -21,14 +23,11 @@ class Status implements OptionSourceInterface
     /**
      * Get Grid row type array for option element.
      * @return array
+     * @deprecated use toOptionArray
      */
     public function getOptions(): array
     {
-        $res = [];
-        foreach ($this->getOptionArray() as $index => $value) {
-            $res[] = ['value' => $index, 'label' => $value];
-        }
-        return $res;
+        return $this->toOptionArray();
     }
 
     /**
@@ -51,13 +50,21 @@ class Status implements OptionSourceInterface
         ];
     }
 
+    /**
+     * @param int|null $status
+     * @return string
+     */
     public static function getStatusName(?int $status): string
     {
-        return self::getOptionArray()[$status ?? 0]['label'];
+        $statuses = array_column(self::getOptionArray(), 'label', 'value');
+        return (string)($statuses[$status] ?? $statuses[0] ?? '');
     }
 
+    /**
+     * @return array
+     */
     public function toOptionArray(): array
     {
-        return $this->getOptions();
+        return self::getOptionArray();
     }
 }

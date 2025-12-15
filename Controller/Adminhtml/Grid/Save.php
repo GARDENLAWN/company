@@ -5,7 +5,7 @@ namespace GardenLawn\Company\Controller\Adminhtml\Grid;
 use Exception;
 use GardenLawn\Company\Model\GridFactory;
 use GardenLawn\Company\Model\CompanyCommentFactory;
-use GardenLawn\Company\Model\Status;
+use GardenLawn\Company\Model\Config\Source\Status;
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
 

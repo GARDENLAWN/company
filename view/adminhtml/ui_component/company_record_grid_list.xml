@@ -205,15 +205,17 @@
                 <label translate="true">Distance</label>
             </settings>
         </column>
-        <column name="status">
+        <column name="status" component="Magento_Ui/js/grid/columns/select">
             <settings>
-                <filter>text</filter>
-                <dataType>text</dataType>
+                <options class="GardenLawn\Company\Model\Config\Source\Status"/>
+                <filter>select</filter>
+                <dataType>select</dataType>
                 <label translate="true">Status</label>
             </settings>
         </column>
-        <column name="customer_group_id">
+        <column name="customer_group_id" component="Magento_Ui/js/grid/columns/select">
             <settings>
+                <options class="Magento\Customer\Model\Customer\Source\Group"/>
                 <filter>select</filter>
                 <dataType>select</dataType>
                 <label translate="true">Group</label>

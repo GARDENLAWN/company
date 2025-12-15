@@ -3,7 +3,7 @@
 namespace GardenLawn\Company\Block\Adminhtml;
 
 use GardenLawn\Company\Model\ResourceModel\CompanyComment\CollectionFactory;
-use GardenLawn\Company\Model\Status;
+use GardenLawn\Company\Model\Config\Source\Status;
 use Magento\Framework\Registry;
 use Magento\Framework\View\Element\Template;
 use Magento\Framework\View\Element\Template\Context;

@@ -4,7 +4,7 @@ namespace GardenLawn\Company\Block\Adminhtml\Grid\Edit;
 
 use GardenLawn\Company\Model\CustomerGroups;
 use GardenLawn\Company\Model\Customers;
-use GardenLawn\Company\Model\Status;
+use GardenLawn\Company\Model\Config\Source\Status;
 use IntlDateFormatter;
 use Magento\Backend\Block\Template\Context;
 use Magento\Backend\Block\Widget\Form\Generic;
