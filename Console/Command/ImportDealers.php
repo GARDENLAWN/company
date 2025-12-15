@@ -56,7 +56,7 @@ class ImportDealers extends Command
         try {
             $this->state->setAreaCode('adminhtml');
         } catch (Exception $e) {
-            // Area code already set
+            $output->writeln('<comment>Area code already set.</comment>');
         }
 
         $this->importStihl($output);
@@ -76,42 +76,62 @@ class ImportDealers extends Command
      */
     private function importStihl(OutputInterface $output): void
     {
+        $output->writeln('<info>--- Starting Stihl Import ---</info>');
         $filePath = $this->getFilePath(self::STIHL_FILE);
         if (!file_exists($filePath)) {
             $output->writeln('<error>Stihl JSON file not found at: ' . $filePath . '</error>');
             return;
         }
+        $output->writeln('<comment>Found file: ' . $filePath . '</comment>');
 
         $json = file_get_contents($filePath);
         $data = json_decode($json, true);
 
-        foreach ($data['dealers'] as $dealerData) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $output->writeln('<error>Error parsing Stihl JSON: ' . json_last_error_msg() . '</error>');
+            return;
+        }
+
+        if (!isset($data['dealers']) || !is_array($data['dealers'])) {
+            $output->writeln('<error>Invalid Stihl JSON format. Missing "dealers" array.</error>');
+            return;
+        }
+
+        $dealers = $data['dealers'];
+        $output->writeln('<comment>Found ' . count($dealers) . ' records in Stihl file.</comment>');
+
+        foreach ($dealers as $dealerData) {
+            $dealerName = $dealerData['name'] ?? 'N/A';
+            $output->writeln('Processing Stihl dealer: ' . $dealerName);
+
             $collection = $this->companyCollectionFactory->create();
-            $collection->addFieldToFilter('name', $dealerData['name'])
+            $collection->addFieldToFilter('name', $dealerName)
                 ->addFieldToFilter('customer_group_id', 5)
                 ->setPageSize(1);
 
             $company = $collection->getFirstItem();
 
-            if (!$company->getId()) {
-                $company = $this->companyFactory->create();
+            $action = 'Creating new record...';
+            if ($company->getId()) {
+                $action = 'Updating existing record (ID: ' . $company->getId() . ')...';
             }
+            $output->writeln('  -> ' . $action);
 
             $company->setData([
                 'company_id' => $company->getId(), // Preserve ID if exists
                 'customer_group_id' => 5,
-                'name' => $dealerData['name'],
+                'name' => $dealerName,
                 'phone' => $dealerData['businessPhone'],
                 'email' => $dealerData['email'],
                 'www' => $dealerData['website'],
-                'address' => $dealerData['street'] . ', ' . $dealerData['zip'] . ' ' . $dealerData['city'],
-                'distance' => $dealerData['distance'],
+                'address' => ($dealerData['street'] ?? '') . ', ' . ($dealerData['zip'] ?? '') . ' ' . ($dealerData['city'] ?? ''),
+                'distance' => $dealerData['distance'] ?? null,
                 'status' => 1
             ]);
             $this->companyResource->save($company);
         }
 
-        $output->writeln('<info>Stihl dealers imported successfully.</info>');
+        $output->writeln('<info>Stihl dealers import finished.</info>');
     }
 
     /**
@@ -119,40 +139,60 @@ class ImportDealers extends Command
      */
     private function importHusqvarna(OutputInterface $output): void
     {
+        $output->writeln('<info>--- Starting Husqvarna Import ---</info>');
         $filePath = $this->getFilePath(self::HUSQVARNA_FILE);
         if (!file_exists($filePath)) {
             $output->writeln('<error>Husqvarna JSON file not found at: ' . $filePath . '</error>');
             return;
         }
+        $output->writeln('<comment>Found file: ' . $filePath . '</comment>');
 
         $json = file_get_contents($filePath);
         $data = json_decode($json, true);
 
-        foreach ($data['dealers'] as $dealerData) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $output->writeln('<error>Error parsing Husqvarna JSON: ' . json_last_error_msg() . '</error>');
+            return;
+        }
+
+        if (!isset($data['dealers']) || !is_array($data['dealers'])) {
+            $output->writeln('<error>Invalid Husqvarna JSON format. Missing "dealers" array.</error>');
+            return;
+        }
+
+        $dealers = $data['dealers'];
+        $output->writeln('<comment>Found ' . count($dealers) . ' records in Husqvarna file.</comment>');
+
+        foreach ($dealers as $dealerData) {
+            $dealerName = $dealerData['title'] ?? 'N/A';
+            $output->writeln('Processing Husqvarna dealer: ' . $dealerName);
+
             $collection = $this->companyCollectionFactory->create();
-            $collection->addFieldToFilter('name', $dealerData['title'])
+            $collection->addFieldToFilter('name', $dealerName)
                 ->addFieldToFilter('customer_group_id', 6)
                 ->setPageSize(1);
 
             $company = $collection->getFirstItem();
 
-            if (!$company->getId()) {
-                $company = $this->companyFactory->create();
+            $action = 'Creating new record...';
+            if ($company->getId()) {
+                $action = 'Updating existing record (ID: ' . $company->getId() . ')...';
             }
+            $output->writeln('  -> ' . $action);
 
             $company->setData([
                 'company_id' => $company->getId(), // Preserve ID if exists
                 'customer_group_id' => 6,
-                'name' => $dealerData['title'],
+                'name' => $dealerName,
                 'phone' => $dealerData['phone'],
                 'email' => $dealerData['email'],
                 'www' => $dealerData['web'],
-                'address' => str_replace(["\r\n", "\r"], ' ', $dealerData['address']),
+                'address' => str_replace(["\r\n", "\r"], ' ', $dealerData['address'] ?? ''),
                 'status' => 1
             ]);
             $this->companyResource->save($company);
         }
 
-        $output->writeln('<info>Husqvarna dealers imported successfully.</info>');
+        $output->writeln('<info>Husqvarna dealers import finished.</info>');
     }
 }
