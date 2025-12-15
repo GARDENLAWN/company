@@ -35,4 +35,11 @@
             </argument>
         </arguments>
     </type>
+    <type name="Magento\Framework\Console\CommandList">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="import_dealers" xsi:type="object">GardenLawn\Company\Console\Command\ImportDealers</item>
+            </argument>
+        </arguments>
+    </type>
 </config>
