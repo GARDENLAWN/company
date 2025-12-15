@@ -177,11 +177,10 @@
                 <label translate="true">Phone</label>
             </settings>
         </column>
-        <column name="www" class="GardenLawn\Company\Ui\Component\Listing\Grid\Column\Www">
+        <column name="www">
             <settings>
                 <filter>text</filter>
-                <dataType>html</dataType>
-                <bodyTmpl>ui/grid/cells/html</bodyTmpl>
+                <dataType>text</dataType>
                 <label translate="true">Www</label>
             </settings>
         </column>
@@ -206,7 +205,7 @@
                 <label translate="true">Distance</label>
             </settings>
         </column>
-        <column name="status" class="GardenLawn\Company\Ui\Component\Listing\Grid\Column\Status">
+        <column name="status" component="Magento_Ui/js/grid/columns/select">
             <settings>
                 <options class="GardenLawn\Company\Model\Config\Source\Status"/>
                 <filter>select</filter>
