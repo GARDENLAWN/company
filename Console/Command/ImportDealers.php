@@ -12,6 +12,7 @@ use Magento\Framework\App\State;
 use Magento\Framework\Filesystem\DirectoryList;
 use GardenLawn\Company\Model\CompanyFactory;
 use GardenLawn\Company\Model\ResourceModel\Company as CompanyResource;
+use GardenLawn\Company\Model\ResourceModel\Company\CollectionFactory as CompanyCollectionFactory;
 
 class ImportDealers extends Command
 {
@@ -23,17 +24,20 @@ class ImportDealers extends Command
     private DirectoryList $dir;
     private CompanyFactory $companyFactory;
     private CompanyResource $companyResource;
+    private CompanyCollectionFactory $companyCollectionFactory;
 
     public function __construct(
         State $state,
         DirectoryList $dir,
         CompanyFactory $companyFactory,
-        CompanyResource $companyResource
+        CompanyResource $companyResource,
+        CompanyCollectionFactory $companyCollectionFactory
     ) {
         $this->state = $state;
         $this->dir = $dir;
         $this->companyFactory = $companyFactory;
         $this->companyResource = $companyResource;
+        $this->companyCollectionFactory = $companyCollectionFactory;
         parent::__construct();
     }
 
@@ -76,8 +80,19 @@ class ImportDealers extends Command
         $data = json_decode($json, true);
 
         foreach ($data['dealers'] as $dealerData) {
-            $company = $this->companyFactory->create();
+            $collection = $this->companyCollectionFactory->create();
+            $collection->addFieldToFilter('name', $dealerData['name'])
+                ->addFieldToFilter('customer_group_id', 5)
+                ->setPageSize(1);
+
+            $company = $collection->getFirstItem();
+
+            if (!$company->getId()) {
+                $company = $this->companyFactory->create();
+            }
+
             $company->setData([
+                'company_id' => $company->getId(), // Preserve ID if exists
                 'customer_group_id' => 5,
                 'name' => $dealerData['name'],
                 'phone' => $dealerData['businessPhone'],
@@ -108,8 +123,19 @@ class ImportDealers extends Command
         $data = json_decode($json, true);
 
         foreach ($data['dealers'] as $dealerData) {
-            $company = $this->companyFactory->create();
+            $collection = $this->companyCollectionFactory->create();
+            $collection->addFieldToFilter('name', $dealerData['title'])
+                ->addFieldToFilter('customer_group_id', 6)
+                ->setPageSize(1);
+
+            $company = $collection->getFirstItem();
+
+            if (!$company->getId()) {
+                $company = $this->companyFactory->create();
+            }
+
             $company->setData([
+                'company_id' => $company->getId(), // Preserve ID if exists
                 'customer_group_id' => 6,
                 'name' => $dealerData['title'],
                 'phone' => $dealerData['phone'],
