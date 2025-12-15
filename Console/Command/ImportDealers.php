@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace GardenLawn\Company\Console\Command;
 
 use Exception;
-use Magento\Framework\Exception\AlreadyExistsException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
