@@ -2,8 +2,6 @@
 
 namespace GardenLawn\Company\Ui\Component\Listing\Grid\Column;
 
-use GardenLawn\Company\Model\CustomerGroups;
-use GardenLawn\Company\Model\Config\Source\Status;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
@@ -18,13 +16,11 @@ class Action extends Column
     private string $_editUrl;
     private string $_customerCreateUrl;
     private string $_sendEmailUrl;
-    private CustomerGroups $customerGroups;
 
     public function __construct(
         ContextInterface   $context,
         UiComponentFactory $uiComponentFactory,
         UrlInterface       $urlBuilder,
-        CustomerGroups     $customerGroups,
         array              $components = [],
         array              $data = [],
         string             $editUrl = self::ROW_EDIT_URL,
@@ -36,7 +32,6 @@ class Action extends Column
         $this->_editUrl = $editUrl;
         $this->_customerCreateUrl = $customerCreateUrl;
         $this->_sendEmailUrl = $sendEmailUrl;
-        $this->customerGroups = $customerGroups;
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
 
@@ -46,8 +41,6 @@ class Action extends Column
             foreach ($dataSource['data']['items'] as &$item) {
                 $name = $this->getData('name');
                 if (isset($item['company_id'])) {
-                    $item['status'] = Status::getStatusName($item['status']);
-                    $item['customer_group_id'] = $this->customerGroups->getGroupName($item['customer_group_id']);
                     $item[$name]['edit'] = [
                         'href' => $this->_urlBuilder->getUrl(
                             $this->_editUrl,
