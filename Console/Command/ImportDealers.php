@@ -48,9 +48,6 @@ class ImportDealers extends Command
         parent::configure();
     }
 
-    /**
-     * @throws AlreadyExistsException
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         try {
@@ -71,9 +68,6 @@ class ImportDealers extends Command
         return $modulePath . '/Configs/' . $fileName;
     }
 
-    /**
-     * @throws AlreadyExistsException
-     */
     private function importStihl(OutputInterface $output): void
     {
         $output->writeln('<info>--- Starting Stihl Import ---</info>');
@@ -101,7 +95,11 @@ class ImportDealers extends Command
         $output->writeln('<comment>Found ' . count($dealers) . ' records in Stihl file.</comment>');
 
         foreach ($dealers as $dealerData) {
-            $dealerName = $dealerData['name'] ?? 'N/A';
+            $dealerName = $dealerData['name'] ?? null;
+            if (!$dealerName) {
+                $output->writeln('<error>Skipping record due to empty name.</error>');
+                continue;
+            }
             $output->writeln('Processing Stihl dealer: ' . $dealerName);
 
             $collection = $this->companyCollectionFactory->create();
@@ -109,16 +107,15 @@ class ImportDealers extends Command
                 ->addFieldToFilter('customer_group_id', 5)
                 ->setPageSize(1);
 
-            $company = $collection->getFirstItem();
-
-            $action = 'Creating new record...';
-            if ($company->getId()) {
-                $action = 'Updating existing record (ID: ' . $company->getId() . ')...';
+            if ($collection->count() > 0) {
+                $company = $collection->getFirstItem();
+                $output->writeln('  -> Updating existing record (ID: ' . $company->getId() . ')...');
+            } else {
+                $company = $this->companyFactory->create();
+                $output->writeln('  -> Creating new record...');
             }
-            $output->writeln('  -> ' . $action);
 
-            $company->setData([
-                'company_id' => $company->getId(), // Preserve ID if exists
+            $dataToSave = [
                 'customer_group_id' => 5,
                 'name' => $dealerName,
                 'phone' => $dealerData['businessPhone'],
@@ -127,16 +124,15 @@ class ImportDealers extends Command
                 'address' => ($dealerData['street'] ?? '') . ', ' . ($dealerData['zip'] ?? '') . ' ' . ($dealerData['city'] ?? ''),
                 'distance' => $dealerData['distance'] ?? null,
                 'status' => 1
-            ]);
+            ];
+
+            $company->addData($dataToSave);
             $this->companyResource->save($company);
         }
 
         $output->writeln('<info>Stihl dealers import finished.</info>');
     }
 
-    /**
-     * @throws AlreadyExistsException
-     */
     private function importHusqvarna(OutputInterface $output): void
     {
         $output->writeln('<info>--- Starting Husqvarna Import ---</info>');
@@ -164,7 +160,11 @@ class ImportDealers extends Command
         $output->writeln('<comment>Found ' . count($dealers) . ' records in Husqvarna file.</comment>');
 
         foreach ($dealers as $dealerData) {
-            $dealerName = $dealerData['title'] ?? 'N/A';
+            $dealerName = $dealerData['title'] ?? null;
+            if (!$dealerName) {
+                $output->writeln('<error>Skipping record due to empty name.</error>');
+                continue;
+            }
             $output->writeln('Processing Husqvarna dealer: ' . $dealerName);
 
             $collection = $this->companyCollectionFactory->create();
@@ -172,16 +172,15 @@ class ImportDealers extends Command
                 ->addFieldToFilter('customer_group_id', 6)
                 ->setPageSize(1);
 
-            $company = $collection->getFirstItem();
-
-            $action = 'Creating new record...';
-            if ($company->getId()) {
-                $action = 'Updating existing record (ID: ' . $company->getId() . ')...';
+            if ($collection->count() > 0) {
+                $company = $collection->getFirstItem();
+                $output->writeln('  -> Updating existing record (ID: ' . $company->getId() . ')...');
+            } else {
+                $company = $this->companyFactory->create();
+                $output->writeln('  -> Creating new record...');
             }
-            $output->writeln('  -> ' . $action);
 
-            $company->setData([
-                'company_id' => $company->getId(), // Preserve ID if exists
+            $dataToSave = [
                 'customer_group_id' => 6,
                 'name' => $dealerName,
                 'phone' => $dealerData['phone'],
@@ -189,7 +188,9 @@ class ImportDealers extends Command
                 'www' => $dealerData['web'],
                 'address' => str_replace(["\r\n", "\r"], ' ', $dealerData['address'] ?? ''),
                 'status' => 1
-            ]);
+            ];
+
+            $company->addData($dataToSave);
             $this->companyResource->save($company);
         }
 
