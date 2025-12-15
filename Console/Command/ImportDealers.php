@@ -9,7 +9,8 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Magento\Framework\App\State;
-use Magento\Framework\Filesystem\DirectoryList;
+use Magento\Framework\Component\ComponentRegistrar;
+use Magento\Framework\Component\ComponentRegistrarInterface;
 use GardenLawn\Company\Model\CompanyFactory;
 use GardenLawn\Company\Model\ResourceModel\Company as CompanyResource;
 use GardenLawn\Company\Model\ResourceModel\Company\CollectionFactory as CompanyCollectionFactory;
@@ -18,26 +19,25 @@ class ImportDealers extends Command
 {
     private const string STIHL_FILE = 'stihl.json';
     private const string HUSQVARNA_FILE = 'husqvarna.json';
-    private const string CONFIG_PATH = 'app/code/GardenLawn/Core/Configs/';
 
     private State $state;
-    private DirectoryList $dir;
     private CompanyFactory $companyFactory;
     private CompanyResource $companyResource;
     private CompanyCollectionFactory $companyCollectionFactory;
+    private ComponentRegistrarInterface $componentRegistrar;
 
     public function __construct(
         State $state,
-        DirectoryList $dir,
         CompanyFactory $companyFactory,
         CompanyResource $companyResource,
-        CompanyCollectionFactory $companyCollectionFactory
+        CompanyCollectionFactory $companyCollectionFactory,
+        ComponentRegistrarInterface $componentRegistrar
     ) {
         $this->state = $state;
-        $this->dir = $dir;
         $this->companyFactory = $companyFactory;
         $this->companyResource = $companyResource;
         $this->companyCollectionFactory = $companyCollectionFactory;
+        $this->componentRegistrar = $componentRegistrar;
         parent::__construct();
     }
 
@@ -65,14 +65,20 @@ class ImportDealers extends Command
         return 0;
     }
 
+    private function getFilePath(string $fileName): string
+    {
+        $modulePath = $this->componentRegistrar->getPath(ComponentRegistrar::MODULE, 'GardenLawn_Core');
+        return $modulePath . '/Configs/' . $fileName;
+    }
+
     /**
      * @throws AlreadyExistsException
      */
     private function importStihl(OutputInterface $output): void
     {
-        $filePath = $this->dir->getRoot() . '/' . self::CONFIG_PATH . self::STIHL_FILE;
+        $filePath = $this->getFilePath(self::STIHL_FILE);
         if (!file_exists($filePath)) {
-            $output->writeln('<error>Stihl JSON file not found.</error>');
+            $output->writeln('<error>Stihl JSON file not found at: ' . $filePath . '</error>');
             return;
         }
 
@@ -113,9 +119,9 @@ class ImportDealers extends Command
      */
     private function importHusqvarna(OutputInterface $output): void
     {
-        $filePath = $this->dir->getRoot() . '/' . self::CONFIG_PATH . self::HUSQVARNA_FILE;
+        $filePath = $this->getFilePath(self::HUSQVARNA_FILE);
         if (!file_exists($filePath)) {
-            $output->writeln('<error>Husqvarna JSON file not found.</error>');
+            $output->writeln('<error>Husqvarna JSON file not found at: ' . $filePath . '</error>');
             return;
         }
 
