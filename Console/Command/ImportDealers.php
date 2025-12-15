@@ -79,7 +79,6 @@ class ImportDealers extends Command
             $company = $this->companyFactory->create();
             $company->setData([
                 'customer_group_id' => 5,
-                'nip' => $dealerData['accountNumber'],
                 'name' => $dealerData['name'],
                 'phone' => $dealerData['businessPhone'],
                 'email' => $dealerData['email'],
