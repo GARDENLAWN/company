@@ -6,7 +6,7 @@ namespace GardenLawn\Company\Cron;
 use Exception;
 use GardenLawn\Company\Api\Data\CeidgService;
 use GardenLawn\Company\Api\Data\Exception\CeidgApiException;
-use GardenLawn\Company\Enum\Status;
+use GardenLawn\Company\Model\Config\Source\Status;
 use GardenLawn\Company\Helper\Data as CompanyHelper;
 use GardenLawn\Core\Utils\Logger;
 use Magento\Framework\App\ObjectManager;
@@ -62,7 +62,7 @@ class CompanyCeidg
             $url_components = parse_url($last);
             parse_str($url_components['query'], $params);
             $max = (int)($params['page'] ?? 1);
-            $status = Status::New->value; // This status is for internal company status, not CEIDG API status
+            $status = Status::StatusNew; // This status is for internal company status, not CEIDG API status
 
             for ($i = 1; $i <= $max; $i++) {
                 $current = $govlink . $i;

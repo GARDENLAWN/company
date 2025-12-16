@@ -6,6 +6,7 @@ use Magento\Framework\Data\OptionSourceInterface;
 
 class Status implements OptionSourceInterface
 {
+    public const int StatusNew = 1;
     public const int StatusCreateCustomer = 4;
 
     /**
