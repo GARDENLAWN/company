@@ -42,4 +42,14 @@
             </argument>
         </arguments>
     </type>
+
+    <!-- Santander B2B Restriction -->
+    <type name="Aurora\Santander\ViewModel\Rates">
+        <plugin name="gardenlawn_company_santander_rates_view_model_plugin"
+                type="GardenLawn\Company\Plugin\Payment\SantanderRatesViewModelPlugin" sortOrder="10"/>
+    </type>
+    <type name="Aurora\Santander\ViewModel\Installment">
+        <plugin name="gardenlawn_company_santander_installment_view_model_plugin"
+                type="GardenLawn\Company\Plugin\Payment\SantanderInstallmentViewModelPlugin" sortOrder="10"/>
+    </type>
 </config>
