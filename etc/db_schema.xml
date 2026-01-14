@@ -10,7 +10,7 @@
                 comment="Updated at"/>
         <column xsi:type="int" name="customer_group_id" unsigned="true" nullable="true" identity="false" default="4"
                 comment="Customer Group"/>
-        <column xsi:type="text" name="nip" nullable="true" comment="NIP"/>
+        <column xsi:type="varchar" name="nip" length="32" nullable="true" comment="NIP"/>
         <column xsi:type="text" name="name" nullable="true" comment="Name"/>
         <column xsi:type="text" name="phone" nullable="true" comment="Phone"/>
         <column xsi:type="text" name="email" nullable="true" comment="Email"/>
@@ -32,6 +32,9 @@
         <constraint xsi:type="foreign" referenceId="COMPANY_CUSTOMER_GROUP_ID"
                     table="gardenlawn_company" column="customer_group_id" referenceTable="customer_group"
                     referenceColumn="customer_group_id" onDelete="SET NULL"/>
+        <index referenceId="GARDENLAWN_COMPANY_NIP" indexType="btree">
+            <column name="nip"/>
+        </index>
     </table>
     <table name="gardenlawn_company_comment" resource="default" engine="innodb" comment="Comments to company">
         <column xsi:type="int" name="comment_id" unsigned="true" nullable="false" identity="true"

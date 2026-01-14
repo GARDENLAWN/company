@@ -5,7 +5,6 @@ namespace GardenLawn\Company\Api\Data;
 
 use GardenLawn\Company\Api\Data\Exception\CeidgApiException;
 use GardenLawn\Company\Helper\Data as HelperData;
-use GardenLawn\Core\Utils\Logger;
 use Magento\Framework\App\CacheInterface;
 use Magento\Framework\HTTP\Client\Curl;
 use Psr\Log\LoggerInterface;
@@ -15,9 +14,9 @@ class CeidgService
     private const string CACHE_KEY_PREFIX = 'ceidg_api_';
     private const int CACHE_LIFETIME = 86400; // 24 hours
 
-    protected HelperData $helperData;
-    protected Curl $curlClient;
-    protected LoggerInterface $logger;
+    private HelperData $helperData;
+    private Curl $curlClient;
+    private LoggerInterface $logger;
     private CacheInterface $cache;
 
     public function __construct(
@@ -76,6 +75,8 @@ class CeidgService
      */
     public function getDataByUrl(string $url): ?object
     {
+        // Consider moving sleep logic to the caller (Cron) if possible to avoid blocking frontend calls if reused.
+        // However, if this service is strictly for scraping/syncing, sleep here is a simple rate limiter.
         sleep(4);
         return $this->makeRequest($url);
     }
@@ -103,16 +104,25 @@ class CeidgService
         }
 
         $this->curlClient->addHeader('Authorization', 'Bearer ' . $token);
-        $this->curlClient->get($url);
+
+        $startTime = microtime(true);
+        try {
+            $this->curlClient->get($url);
+        } catch (\Exception $e) {
+            $this->logger->error('CEIDG API Connection Error: ' . $e->getMessage());
+            throw new CeidgApiException(__('CEIDG API Connection Error: %1', $e->getMessage()));
+        }
+        $duration = microtime(true) - $startTime;
 
         $status = $this->curlClient->getStatus();
         $responseBody = $this->curlClient->getBody();
 
         if ($status !== 200) {
             $errorMessage = sprintf(
-                'CEIDG API request to %s failed with status %d. Response: %s',
+                'CEIDG API request to %s failed with status %d (Duration: %.2fs). Response: %s',
                 $url,
                 $status,
+                $duration,
                 $responseBody
             );
             $this->logger->error($errorMessage);
